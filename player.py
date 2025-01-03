@@ -77,12 +77,12 @@ class BasePlayer(pygame.sprite.Sprite):
         self.is_blocking = False
         
         # 碰撞箱設置
-        scaled_w = config.sprite_width * config.scale
-        scaled_h = config.sprite_height * config.scale
-        self.rect = pygame.Rect(x, y, scaled_w, scaled_h)
+        self.scaled_w = config.sprite_width * config.scale
+        self.scaled_h = config.sprite_height * config.scale
+        self.rect = pygame.Rect(x, y, self.scaled_w, self.scaled_h)
         self.hitbox = pygame.Rect(x, y, 
-                                scaled_w * config.hit_box_scale[0],
-                                scaled_h * config.hit_box_scale[1])
+                                self.scaled_w * config.hit_box_scale[0],
+                                self.scaled_h * config.hit_box_scale[1])
         
         # 特殊技能
         self.input_buffer = []
@@ -156,10 +156,16 @@ class BasePlayer(pygame.sprite.Sprite):
         self.position += self.velocity * delta_time
         
         # 基本地面碰撞
-        if self.position.y > 500:  # 這裡應該由遊戲系統提供真實的地面高度
-            self.position.y = 500
+        if self.position.y > 580 - self.scaled_h:  # 這裡應該由遊戲系統提供真實的地面高度
+            self.position.y = 580 - self.scaled_h
             self.velocity.y = 0
             self.on_ground = True
+        if self.position.x < 100 and self.velocity.x < 0:
+            self.velocity.x = 0
+            return
+        elif self.position.x > 1200 - self.scaled_w and self.velocity.x > 0:
+            self.velocity.x = 0
+            return
     
     def _update_hitboxes(self): 
         self.rect.x = self.position.x
@@ -255,7 +261,7 @@ def create_kirby_config():
         sprite_sheet_path="resources/fighter/kirby_trans.png",
         sprite_width=32,
         sprite_height=32,
-        scale=2.0,
+        scale=3.0,
         animations={
             FighterState.IDLE: AnimationConfig(
                 frames=mapping["idle"],
@@ -323,7 +329,7 @@ def create_ryu_config():
         sprite_sheet_path="resources/fighter/ryu_trans.png",
         sprite_width=110,
         sprite_height=100,
-        scale=1.0,
+        scale=2.0,
         animations={
             FighterState.IDLE: AnimationConfig(
                 frames=mapping["idle"],

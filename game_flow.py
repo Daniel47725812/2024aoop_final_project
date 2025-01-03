@@ -1,6 +1,6 @@
 import pygame
 import sys
-import player_temp as player
+from player import Kirby, Ryu, FighterState
 
 # 初始化 Pygame
 pygame.init()
@@ -30,15 +30,15 @@ STATE_BATTLE = "battle"
 STATE_RESULT = "result"
 
 # 初始化玩家
-player1 = player.Player(300, 300, (0, 0, 255))
-player2 = player.Player(600, 300, (0, 255, 0))
+player1 = Kirby(200, 300)
+player2 = Ryu(800, 300)
 
 
 # 初始遊戲狀態
 game_state = STATE_MENU
 player_count_selection = 1  # 預設選擇一位玩家
 field_num = 0               # 預設選擇第一個場景
-countdown = 20              # 遊戲時間
+countdown = 60              # 遊戲時間
 start_time = 0              # 遊戲開始時間
 round = 1                   # 遊戲回合
 
@@ -183,8 +183,41 @@ def draw_battle():
 # 更新 handle_battle_input 函數
 def handle_battle_input(event):
     global game_state
+    key_mapping = {
+        pygame.K_DOWN: "DOWN",
+        pygame.K_UP: "UP",
+        pygame.K_LEFT: "LEFT",
+        pygame.K_RIGHT: "RIGHT",
+        pygame.K_z: "PUNCH",  # Z鍵作為出拳鍵
+        pygame.K_x: "KICK"    # X鍵作為踢腿鍵
+    }
+    # 更新玩家移動與攻擊
     if event.key == pygame.K_ESCAPE:
         game_state = STATE_RESULT
+    if event.type == pygame.KEYDOWN:
+        if event.key in key_mapping:
+            player1.handle_input(key_mapping[event.key])
+            
+        if event.key == pygame.K_LEFT:
+            player1.move(-20)
+        elif event.key == pygame.K_RIGHT:
+            player1.move(20)
+        elif event.key == pygame.K_UP:
+            player1.jump()
+        elif event.key == pygame.K_SPACE:
+            player1.attack(10)
+        elif event.key == pygame.K_DOWN:
+            player1.block()
+    if event.type == pygame.KEYUP:
+        if event.key == pygame.K_SPACE:  # 松开攻击键
+            player1.attack_key_held = False
+            player1.velocity.x = 0
+        if event.key in [pygame.K_LEFT, pygame.K_RIGHT]:
+            player1.velocity.x = 0
+            player1.change_state(FighterState.IDLE)
+        elif event.key == pygame.K_DOWN:
+            player1.is_blocking = False
+            player1.change_state(FighterState.IDLE)
 
 
 
@@ -213,7 +246,7 @@ while True:
             pygame.quit()
             sys.exit()
 
-        if event.type == pygame.KEYDOWN:# 按鍵事件
+        if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:# 按鍵事件
             if game_state == STATE_MENU:
                 game_state = STATE_PLAYER_SELECT
             elif game_state == STATE_PLAYER_SELECT:
@@ -251,11 +284,6 @@ while True:
             start_time = current_time
             if round >= 3:
                 game_state = STATE_RESULT
-        # 更新玩家移動與攻擊
-        player1.move(keys, pygame.K_a, pygame.K_d, pygame.K_w, pygame.K_s)
-        if keys[pygame.K_f]:
-            player1.attack()
-        player1.update()
         if num_players == 2:  # 只有雙人模式才更新玩家2
             player2.move(keys, pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN)
             if keys[pygame.K_k]:
@@ -267,6 +295,8 @@ while True:
             if player2.is_attacking and player2.rect.colliderect(player1.rect):
                 print("Player 2 hits Player 1!")
         draw_battle()
+        player1.update(1/60)
+        player1.draw(item_surface)
     elif game_state == STATE_RESULT:
         draw_result()
     
