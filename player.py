@@ -9,7 +9,6 @@ class FighterState(Enum):
     IDLE = "idle"
     WALKING = "walk"
     JUMPING = "jump"
-    CROUCHING = "crouch"
     ATTACKING = "attack"
     DASH = "dash"
     HURT = "hurt"
@@ -36,7 +35,7 @@ class CharacterConfig:
     attack_power: int = 10
     defense: int = 5
     speed: float = 5.0
-    jump_power: float = -300.0
+    jump_power: float = -400.0
     
     # 動畫配置
     animations: Dict[FighterState, AnimationConfig] = None
@@ -152,7 +151,7 @@ class BasePlayer(pygame.sprite.Sprite):
     
     def _handle_physics(self, delta_time: float):
         if not self.on_ground:
-            self.velocity.y += 5  # 重力
+            self.velocity.y += 10  # 重力
         
         self.position += self.velocity * delta_time
         
@@ -291,10 +290,6 @@ def create_kirby_config():
                 loop=False, 
                 next_state=FighterState.IDLE
             ),
-            FighterState.CROUCHING: AnimationConfig(
-                frames=mapping["crouch"],
-                speed=0.1
-            ),
             FighterState.DASH: AnimationConfig(
                 frames=mapping["dash"],
                 speed=0.1,
@@ -361,8 +356,8 @@ def create_ryu_config():
                 loop=False, 
                 next_state=FighterState.IDLE
             ),
-            FighterState.CROUCHING: AnimationConfig(
-                frames=mapping["crouch"],
+            FighterState.DASH: AnimationConfig(
+                frames=mapping["dash"],
                 speed=0.1
             ),
             FighterState.BLOCKING: AnimationConfig(
@@ -388,10 +383,10 @@ class Ryu(BasePlayer):
         mapping = read_sprite_map("resources/fighter/ryu_trans_mapping.json")
         self.projectile_configs[ProjectileType.WAVE] = ProjectileConfig(
             sprite_sheet_path="resources/fighter/ryu_trans.png",
-            frames=mapping["hehe"],  # 假設有4幀動畫
+            frames=mapping["hehe"],
             speed=300,
             damage=15,
-            lifetime=2.0,
+            lifetime=5.0,
             scale=1.5,
             animation_speed=0.1
         )

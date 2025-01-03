@@ -29,10 +29,9 @@ STATE_FIELD_SELECT = "field_select"
 STATE_BATTLE = "battle"
 STATE_RESULT = "result"
 
-
 # 初始遊戲狀態
 def init_game():
-    global game_state, player_count_selection, field_num, countdown, start_time, round, goal1, goal2, player1, player2
+    global game_state, player_count_selection, field_num, countdown, start_time, round, goal1, goal2, player1, player2, p1
         
     game_state = STATE_MENU
     player_count_selection = 1  # 預設選擇一位玩家
@@ -42,6 +41,7 @@ def init_game():
     round = 1                   # 遊戲回合
     goal1 = 0                   # 1p得分
     goal2 = 0                   # 2p得分
+    p1 = Kirby(100, 400)
 
 # 載入圖片
 def load_image():
@@ -124,15 +124,19 @@ player2_selection = 0
 num_players = 1  # 默認只有一位玩家
 
 def draw_character_select():#待修正
+    font = pygame.font.Font(None, 74)
     screen.blit(menu, (0, 0))
     screen.blit(blur_surface, (0, 0))
-    font = pygame.font.Font(None, 74)
+    
     draw_text_centered("Select Characters", font, BLACK, screen, SCREEN_WIDTH//2, 100)
     if num_players == 1:
         draw_text_centered("Player 1", font, BLACK, screen, SCREEN_WIDTH//2, 200)
-        p1 = pygame.image.load("./resources/character_" + str(player1_selection + 1) + "/000.png")
-        p1 = pygame.transform.scale2x(p1)
-        screen.blit(p1, (SCREEN_WIDTH//2 - p1.get_width()//2, 375 - p1.get_height()//2))
+        #p1 = pygame.image.load("./resources/character_" + str(player1_selection + 1) + "/000.png")
+        #p1 = pygame.transform.scale2x(p1)
+        global p1
+        p1.draw(character_surface)
+        p1.update(1/60)
+        #screen.blit(p1, (SCREEN_WIDTH//2 - p1.get_width()//2, 375 - p1.get_height()//2))
     else:
         draw_text_centered("Player 1", font, BLACK, screen, SCREEN_WIDTH//4, 200)
         p1 = pygame.image.load("./resources/character_" + str(player1_selection + 1) + "/000.png")
@@ -142,6 +146,7 @@ def draw_character_select():#待修正
         p2 = pygame.image.load("./resources/character_" + str(player2_selection + 1) + "/000.png")
         p2 = pygame.transform.scale2x(p2)
         screen.blit(p2, (SCREEN_WIDTH//4 * 3 - p2.get_width()//2, 375 - p2.get_height()//2))
+    screen.blit(character_surface, (0, 0))
     
 
 def handle_character_select_input(event):
@@ -164,8 +169,7 @@ def handle_character_select_input(event):
         game_state = STATE_FIELD_SELECT
         global player1, player2
         player1 = Kirby(100, 400)
-        if num_players == 2:
-            player2 = Ryu(800, 400)
+        player2 = Ryu(800, 400)
 
 
 
@@ -191,7 +195,16 @@ def handle_field_input(event):
         game_state = STATE_BATTLE
         start_time = pygame.time.get_ticks()
     
-    
+def detect_collision(player1, player2):
+    if player1.rect.colliderect(player2.rect):
+        if player1.is_blocking:
+            player1.health -= player2.attack_power // 2
+        else:
+            player1.health -= player2.attack_power
+        if player2.is_blocking:
+            player2.health -= player1.attack_power // 2
+        else:
+            player2.health -= player1.attack_power
 
 
 # 更新 draw_battle 函數
@@ -256,6 +269,8 @@ def handle_battle_input(event):
                 player2.health -= player1.attack_power
         elif event.key == pygame.K_s:
             player1.block()
+        elif event.key == pygame.K_e:
+            player1.dash(50)
     if event.type == pygame.KEYUP:
         if event.key == pygame.K_f:  # 松开攻击键
             player1.attack_key_held = False
@@ -266,12 +281,20 @@ def handle_battle_input(event):
         elif event.key == pygame.K_s:
             player1.is_blocking = False
             player1.change_state(FighterState.IDLE)
+        elif event.key == pygame.K_e:
+            player1.velocity.x = 0
+            player1.change_state(FighterState.IDLE)
     
     # 更新玩家2移動與攻擊
     if num_players == 2:
         if event.type == pygame.KEYDOWN:
             if event.key in key_mapping:
                 player2.handle_input(key_mapping[event.key])
+                if len(player2.projectiles) > 0:
+                    print('hehe')
+                    if player2.projectiles[-1].rect.colliderect(player1.rect):
+                        player1.health -= player2.attack_power
+                        print('hit')
             if event.key == pygame.K_LEFT:
                 player2.move(-20)
             elif event.key == pygame.K_RIGHT:
@@ -284,6 +307,8 @@ def handle_battle_input(event):
                     player1.health -= player2.attack_power
             elif event.key == pygame.K_DOWN:
                 player2.block()
+            elif event.key == pygame.K_RSHIFT:
+                player2.dash(50)
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_SPACE:  # 松开攻击键
                 player2.attack_key_held = False
@@ -293,6 +318,9 @@ def handle_battle_input(event):
                 player2.change_state(FighterState.IDLE)
             elif event.key == pygame.K_DOWN:
                 player2.is_blocking = False
+                player2.change_state(FighterState.IDLE)
+            elif event.key == pygame.K_RSHIFT:
+                player2.velocity.x = 0
                 player2.change_state(FighterState.IDLE)
 
 
@@ -354,6 +382,7 @@ if __name__ == "__main__":
         elif game_state == STATE_PLAYER_SELECT:
             draw_player_select()
         elif game_state == STATE_CHARACTER_SELECT:
+            character_surface.fill((0, 0, 0, 0))
             draw_character_select()
         elif game_state == STATE_FIELD_SELECT:
             draw_field_select()
@@ -370,9 +399,9 @@ if __name__ == "__main__":
             if remaining_time == 0 or player1.health <= 0 or player2.health <= 0:
                 round += 1
                 start_time = current_time
-                if player1.health >= player2.health:
+                if player1.health > player2.health:
                     goal1 += 1
-                else:
+                elif player1.health < player2.health:
                     goal2 += 1
                 if round > 3 or goal1 == 2 or goal2 == 2:
                     game_state = STATE_RESULT

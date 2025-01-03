@@ -63,3 +63,4 @@ class Projectile(pygame.sprite.Sprite):
             frame_surface = pygame.transform.scale(frame_surface, new_size)
             
         screen.blit(frame_surface, self.position)
+    
