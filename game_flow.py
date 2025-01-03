@@ -206,12 +206,21 @@ def handle_battle_input(event):
             player1.jump()
         elif event.key == pygame.K_SPACE:
             player1.attack(10)
+            player1.attack_key_held = False
+            player1.velocity.x = 0
         elif event.key == pygame.K_DOWN:
             player1.block()
+        elif event.key == pygame.K_k:
+            player1.dash(50)
+            
     if event.type == pygame.KEYUP:
         if event.key == pygame.K_SPACE:  # 松开攻击键
             player1.attack_key_held = False
             player1.velocity.x = 0
+        if event.key == pygame.K_k:
+            player1.dash_key_held = False
+            player1.velocity.x = 0
+            
         if event.key in [pygame.K_LEFT, pygame.K_RIGHT]:
             player1.velocity.x = 0
             player1.change_state(FighterState.IDLE)

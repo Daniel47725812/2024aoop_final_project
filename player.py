@@ -54,6 +54,7 @@ class BasePlayer(pygame.sprite.Sprite):
         self.velocity = pygame.math.Vector2(0, 0)
         self.facing_right = True
         self.attack_key_held = False
+        self.dash_key_held = False
         
         # 載入精靈圖和設置初始狀態
         self.sprite_sheet = pygame.image.load(config.sprite_sheet_path).convert_alpha()
@@ -223,7 +224,16 @@ class BasePlayer(pygame.sprite.Sprite):
             self.is_attacking = True
             self.attack_key_held = True
             self.change_state(FighterState.ATTACKING)
-    
+            
+    def dash(self, direction: float):
+        if not self.is_attacking and not self.is_blocking:
+            self.dash_key_held = True
+            if self.facing_right:
+                self.move(direction)
+            elif not self.facing_right:
+                self.move(-direction)
+            self.change_state(FighterState.DASH)
+            
     def shoot(self, projectile_type: ProjectileType):
         """發射投射物"""
         if projectile_type in self.projectile_configs:
@@ -287,7 +297,9 @@ def create_kirby_config():
             ),
             FighterState.DASH: AnimationConfig(
                 frames=mapping["dash"],
-                speed=0.1
+                speed=0.1,
+                loop=False,
+                next_state=FighterState.IDLE
             ),
             FighterState.HURT: AnimationConfig(
                 frames=mapping["hurt"],
@@ -389,56 +401,3 @@ class Ryu(BasePlayer):
         if move_name == "HADOKEN":  # 波動拳
             self.shoot(ProjectileType.WAVE)
     
-     
-# 測試
-if __name__ == '__main__':
-    pygame.init()
-    screen = pygame.display.set_mode((800, 600))
-    clock = pygame.time.Clock()
-    
-    key_mapping = {
-        pygame.K_DOWN: "DOWN",
-        pygame.K_UP: "UP",
-        pygame.K_LEFT: "LEFT",
-        pygame.K_RIGHT: "RIGHT",
-        pygame.K_z: "PUNCH",  # Z鍵作為出拳鍵
-        pygame.K_x: "KICK"    # X鍵作為踢腿鍵
-    }
-    player = Ryu(100, 100)
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key in key_mapping:
-                    player.handle_input(key_mapping[event.key])
-                    
-                if event.key == pygame.K_LEFT:
-                    player.move(-20)
-                elif event.key == pygame.K_RIGHT:
-                    player.move(20)
-                elif event.key == pygame.K_UP:
-                    player.jump()
-                elif event.key == pygame.K_SPACE:
-                    player.attack(10)
-                elif event.key == pygame.K_DOWN:
-                    player.block()
-            elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_SPACE:  # 松开攻击键
-                    player.attack_key_held = False
-                    player.velocity.x = 0
-                if event.key in [pygame.K_LEFT, pygame.K_RIGHT]:
-                    player.velocity.x = 0
-                    player.change_state(FighterState.IDLE)
-                elif event.key == pygame.K_DOWN:
-                    player.is_blocking = False
-                    player.change_state(FighterState.IDLE)
-
-        
-        player.update(1/60)
-        screen.fill((255, 255, 255))
-        player.draw(screen)
-        pygame.display.flip()
-        clock.tick(60)
-    pygame.quit()
