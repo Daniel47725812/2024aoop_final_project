@@ -1,6 +1,6 @@
 import pygame
 import sys
-import player
+import player_temp as player
 
 # 初始化 Pygame
 pygame.init()
@@ -9,6 +9,7 @@ pygame.init()
 SCREEN_WIDTH, SCREEN_HEIGHT = 1200, 600
 item_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
 blur_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+character_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("格鬥遊戲")
 
@@ -29,13 +30,17 @@ STATE_BATTLE = "battle"
 STATE_RESULT = "result"
 
 # 初始化玩家
-player1 = player.Player(300, 300, (0, 0, 255), {"up": pygame.K_w, "down": pygame.K_s, "left": pygame.K_a, "right": pygame.K_d, "attack": pygame.K_f})
-player2 = player.Player(600, 300, (0, 255, 0), {"up": pygame.K_UP, "down": pygame.K_DOWN, "left": pygame.K_LEFT, "right": pygame.K_RIGHT, "attack": pygame.K_SLASH})
+player1 = player.Player(300, 300, (0, 0, 255))
+player2 = player.Player(600, 300, (0, 255, 0))
 
 
 # 初始遊戲狀態
 game_state = STATE_MENU
-field_num = 0
+player_count_selection = 1  # 預設選擇一位玩家
+field_num = 0               # 預設選擇第一個場景
+countdown = 20              # 遊戲時間
+start_time = 0              # 遊戲開始時間
+round = 1                   # 遊戲回合
 
 def draw_text_centered(text, font, color, surface, x, y):
     # 渲染文字
@@ -60,8 +65,6 @@ def draw_menu():
 
 
 #選擇玩家人數
-# 玩家人數選擇初始值
-player_count_selection = 1
 
 def draw_player_select():
     screen.blit(bg, (0, 0))
@@ -159,6 +162,7 @@ def handle_field_input(event):
 
     if event.key == pygame.K_RETURN:
         game_state = STATE_BATTLE
+        start_time = pygame.time.get_ticks()
     
     
 
@@ -167,11 +171,14 @@ def handle_field_input(event):
 def draw_battle():
     global bg
     screen.blit(bg, (0, 0))
+    screen.blit(item_surface, (0, 0))
 
     # 繪製玩家
-    player1.draw(screen)
+    player1.draw(character_surface)
     if num_players == 2:  # 只有雙人模式才繪製玩家2
-        player2.draw(screen)
+        player2.draw(character_surface)
+
+    screen.blit(character_surface, (0, 0))
 
 # 更新 handle_battle_input 函數
 def handle_battle_input(event):
@@ -185,6 +192,8 @@ def handle_battle_input(event):
 def draw_result():
     screen.blit(bg, (0, 0))
     screen.blit(blur_surface, (0, 0))
+    screen.blit(item_surface, (0, 0))
+    screen.blit(character_surface, (0, 0))
     font = pygame.font.Font(None, 74)
     draw_text_centered("Game Over, Press R to restart", font, BLACK, screen, SCREEN_WIDTH//2, SCREEN_HEIGHT//2)
 
@@ -198,13 +207,13 @@ def handle_result_input(event):
 # 更新遊戲循環中的輸入處理
 while True:
     keys = pygame.key.get_pressed()
-
+    # 處理事件
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+        if event.type == pygame.QUIT:# 關閉視窗
             pygame.quit()
             sys.exit()
 
-        if event.type == pygame.KEYDOWN:
+        if event.type == pygame.KEYDOWN:# 按鍵事件
             if game_state == STATE_MENU:
                 game_state = STATE_PLAYER_SELECT
             elif game_state == STATE_PLAYER_SELECT:
@@ -228,16 +237,39 @@ while True:
     elif game_state == STATE_FIELD_SELECT:
         draw_field_select()
     elif game_state == STATE_BATTLE:
+        item_surface.fill((0, 0, 0, 0))
+        character_surface.fill((0, 0, 0, 0))
+        # 計算剩餘時間
+        current_time = pygame.time.get_ticks()
+        remaining_time = max(0, countdown - (current_time - start_time)//1000)
+        # 繪製剩餘時間
+        font = pygame.font.Font(None, 74)
+        draw_text_centered(str(remaining_time), font, BLACK, item_surface, SCREEN_WIDTH//2, 50)
+        # 時間到，遊戲結束
+        if remaining_time == 0:
+            round += 1
+            start_time = current_time
+            if round >= 3:
+                game_state = STATE_RESULT
         # 更新玩家移動與攻擊
-        player1.move(keys)
-        player1.attack(keys)
+        player1.move(keys, pygame.K_a, pygame.K_d, pygame.K_w, pygame.K_s)
+        if keys[pygame.K_f]:
+            player1.attack()
+        player1.update()
         if num_players == 2:  # 只有雙人模式才更新玩家2
-            player2.move(keys)
-            player2.attack(keys)
+            player2.move(keys, pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN)
+            if keys[pygame.K_k]:
+                player2.attack()
+            player2.update()
+            # 碰撞檢測
+            if player1.is_attacking and player1.rect.colliderect(player2.rect):
+                print("Player 1 hits Player 2!")
+            if player2.is_attacking and player2.rect.colliderect(player1.rect):
+                print("Player 2 hits Player 1!")
         draw_battle()
     elif game_state == STATE_RESULT:
         draw_result()
-
+    
     # 更新畫面
     pygame.display.flip()
     clock.tick(FPS)
