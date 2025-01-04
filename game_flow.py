@@ -1,6 +1,7 @@
 import pygame
 import sys
-from player import Kirby, Ryu, FighterState
+from player import Kirby, Ryu
+from BasePlayer import FighterState
 
 # 初始化 Pygame
 pygame.init()
@@ -31,7 +32,7 @@ STATE_RESULT = "result"
 
 # 初始遊戲狀態
 def init_game():
-    global game_state, player_count_selection, field_num, countdown, start_time, round, goal1, goal2, player1, player2, p1
+    global game_state, player_count_selection, field_num, countdown, start_time, round, goal1, goal2, player1, player2, characters, characters2
         
     game_state = STATE_MENU
     player_count_selection = 1  # 預設選擇一位玩家
@@ -41,11 +42,14 @@ def init_game():
     round = 1                   # 遊戲回合
     goal1 = 0                   # 1p得分
     goal2 = 0                   # 2p得分
-    p1 = Kirby(100, 400)
+    characters = [Kirby(0, 0), Ryu(0, 0)]
+    characters2 = [Kirby(0, 0), Ryu(0, 0)]
+    player1 = characters[0]
+    player2 = characters2[0]
 
 # 載入圖片
 def load_image():
-    global menu, bg, point_img, blood_bar_0, blood_bar_1, blood_bar_2
+    global menu, bg, point_img, blood_bar_0, blood_bar_1, blood_bar_2, num_img, round_img
 
     menu = pygame.image.load("./resources/Fight Font/ft_019.png")
     menu = pygame.transform.scale(menu, (SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -68,6 +72,15 @@ def load_image():
     blood_bar_2 = pygame.image.load("./resources/Fight Font/ft_002.png")
     blood_bar_2 = pygame.transform.scale(blood_bar_2, (400, 30))
 
+    num_img = []
+    for i in range(10):
+        num_img.append(pygame.image.load(f"./resources/Fight Font/ft_{(i+3):03d}.png"))
+        num_img[i] = pygame.transform.scale2x(num_img[i])
+
+    round_img = []
+    for i in range(4):
+        round_img.append(pygame.image.load(f"./resources/Fight Font/ft_{(i+51):03d}.png"))
+        round_img[i] = pygame.transform.scale2x(round_img[i])
 
 def draw_text_centered(text, font, color, surface, x, y):
     # 渲染文字
@@ -99,77 +112,73 @@ def draw_player_select():
     options = ["1 Player", "2 Players"]
     for i, option in enumerate(options):
         color = BLACK
-        if i + 1 == player_count_selection:
+        if i + 1 == num_players:
             color = (0, 255, 0)  # 高亮顏色（綠色）
 
         draw_text_centered(option, font, color, screen, SCREEN_WIDTH//2, 250 + i * 100)
 
 def handle_player_select_input(event):
-    global player_count_selection, game_state, num_players
+    global game_state, num_players
 
     if event.key in (pygame.K_w, pygame.K_UP):  # 上移
-        player_count_selection = max(1, player_count_selection - 1)
+        num_players = 1
     elif event.key in (pygame.K_s, pygame.K_DOWN):  # 下移
-        player_count_selection = min(2, player_count_selection + 1)
+        num_players = 2
     elif event.key == pygame.K_RETURN:  # 確認選擇
-        num_players = player_count_selection
         game_state = STATE_CHARACTER_SELECT
 
 
 
 # 定義角色選項
-characters = ["Character 1", "Character 2", "Character 3"]
 player1_selection = 0
 player2_selection = 0
 num_players = 1  # 默認只有一位玩家
 
-def draw_character_select():#待修正
+def draw_character_select():
     font = pygame.font.Font(None, 74)
     screen.blit(menu, (0, 0))
     screen.blit(blur_surface, (0, 0))
     
     draw_text_centered("Select Characters", font, BLACK, screen, SCREEN_WIDTH//2, 100)
-    if num_players == 1:
-        draw_text_centered("Player 1", font, BLACK, screen, SCREEN_WIDTH//2, 200)
-        #p1 = pygame.image.load("./resources/character_" + str(player1_selection + 1) + "/000.png")
-        #p1 = pygame.transform.scale2x(p1)
-        global p1
-        p1.draw(character_surface)
-        p1.update(1/60)
-        #screen.blit(p1, (SCREEN_WIDTH//2 - p1.get_width()//2, 375 - p1.get_height()//2))
-    else:
-        draw_text_centered("Player 1", font, BLACK, screen, SCREEN_WIDTH//4, 200)
-        p1 = pygame.image.load("./resources/character_" + str(player1_selection + 1) + "/000.png")
-        p1 = pygame.transform.scale2x(p1)
-        screen.blit(p1, (SCREEN_WIDTH//4 - p1.get_width()//2, 375 - p1.get_height()//2))
+    
+    draw_text_centered("Player 1", font, BLACK, screen, SCREEN_WIDTH//4, 200)
+    global player1, player2
+    if num_players == 2:  # 雙人模式
         draw_text_centered("Player 2", font, BLACK, screen, SCREEN_WIDTH//4 * 3, 200)
-        p2 = pygame.image.load("./resources/character_" + str(player2_selection + 1) + "/000.png")
-        p2 = pygame.transform.scale2x(p2)
-        screen.blit(p2, (SCREEN_WIDTH//4 * 3 - p2.get_width()//2, 375 - p2.get_height()//2))
+    else:
+        draw_text_centered("Computer", font, BLACK, screen, SCREEN_WIDTH//4 * 3, 200)
+    player1.position.x = SCREEN_WIDTH//4 - player1.scaled_w//2
+    player1.position.y = 400
+    player1.draw(character_surface)
+    player1.update(1/60)
+    player2.position.x = SCREEN_WIDTH//4 * 3 - player2.scaled_w//2
+    player2.position.y = 400
+    player2.draw(character_surface)
+    player2.update(1/60)
+
     screen.blit(character_surface, (0, 0))
     
 
 def handle_character_select_input(event):
-    global player1_selection, player2_selection, game_state
+    global player1, player1_selection, player2, player2_selection, game_state
 
     if event.key == pygame.K_a:  # 左
         player1_selection = (player1_selection - 1) % len(characters)
     elif event.key == pygame.K_d:  # 右
         player1_selection = (player1_selection + 1) % len(characters)
+    player1 = characters[player1_selection]
 
-    if num_players == 2:  # 雙人模式
         # 玩家2控制（方向鍵）
-        if event.key == pygame.K_LEFT:  # 左
-            player2_selection = (player2_selection - 1) % len(characters)
-        elif event.key == pygame.K_RIGHT:  # 右 
-            player2_selection = (player2_selection + 1) % len(characters)
+    if event.key == pygame.K_LEFT:  # 左
+        player2_selection = (player2_selection - 1) % len(characters)
+    elif event.key == pygame.K_RIGHT:  # 右 
+        player2_selection = (player2_selection + 1) % len(characters)
+    player2 = characters2[player2_selection]
 
         # 確認選擇（假設兩位玩家都按下 Enter）
     if event.key == pygame.K_RETURN:
         game_state = STATE_FIELD_SELECT
-        global player1, player2
-        player1 = Kirby(100, 400)
-        player2 = Ryu(800, 400)
+        
 
 
 
@@ -177,7 +186,9 @@ def handle_character_select_input(event):
 #選擇場景
 def draw_field_select():
     global field
-    field = bg[field_num]
+    # field = bg[field_num]
+    field = pygame.image.load("./resources/Fight Font/image.png")
+    field = pygame.transform.scale(field, (SCREEN_WIDTH, SCREEN_HEIGHT))
     screen.blit(field, (0, 0))
     screen.blit(blur_surface, (0, 0))
     font = pygame.font.Font(None, 74)
@@ -195,17 +206,27 @@ def handle_field_input(event):
         game_state = STATE_BATTLE
         start_time = pygame.time.get_ticks()
     
-def detect_collision(player1, player2):
-    if player1.rect.colliderect(player2.rect):
-        if player1.is_blocking:
-            player1.health -= player2.attack_power // 2
-        else:
-            player1.health -= player2.attack_power
-        if player2.is_blocking:
-            player2.health -= player1.attack_power // 2
-        else:
-            player2.health -= player1.attack_power
 
+
+def detect_collision(player1, player2):
+    # 攻擊
+    if player1.is_attacking and player2.check_collision(player1.hitboxes):
+        player2.health -= player1.attack_power
+        player1.is_attacking = False
+    if player2.is_attacking and player1.check_collision(player2.hitboxes):
+        player1.health -= player2.attack_power
+        player2.is_attacking = False
+    # 飛行物
+    if len(player1.projectiles) > 0:
+        if player1.projectiles[-1].check_collision(player2.hitboxes):
+            if not player2.is_blocking:
+                player2.health -= player1.projectiles[-1].config.damage
+            player1.projectiles.pop()
+    if len(player2.projectiles) > 0:
+        if player2.projectiles[-1].check_collision(player1.hitboxes):
+            if not player1.is_blocking:
+                player1.health -= player2.projectiles[-1].config.damage
+            player2.projectiles.pop()
 
 # 更新 draw_battle 函數
 def draw_battle():
@@ -213,10 +234,11 @@ def draw_battle():
 
     # 繪製玩家
     player1.draw(character_surface)
+    player1.draw_debug(character_surface)  
     player1.update(1/60)
-    if num_players == 2:  # 只有雙人模式才繪製玩家2
-        player2.draw(character_surface)
-        player2.update(1/60)
+    player2.draw(character_surface)
+    player2.draw_debug(character_surface)
+    player2.update(1/60)
 
     # 繪製血量條
     blood_bar_1 = pygame.transform.scale(blood_bar_1, (max(0, int(player1.health)*4), 30))
@@ -235,12 +257,25 @@ def draw_battle():
         item_surface.blit(point_img, (690, 20))
         if goal2 > 1:
             item_surface.blit(point_img, (640, 20))
+    if remaining_time == countdown:
+        screen.blit(round_img[0], (SCREEN_WIDTH//2 - round_img[0].get_width()//5*3, SCREEN_HEIGHT//2 - round_img[0].get_height()//2))
+        screen.blit(round_img[round], (SCREEN_WIDTH//2 + round_img[0].get_width()//5*2, SCREEN_HEIGHT//2 - round_img[round].get_height()//2))
+        pygame.display.flip()
+        pygame.time.delay(1000)
+        screen.blit(field, (0, 0))
+        screen.blit(item_surface, (0, 0))
+        screen.blit(blur_surface, (0, 0))
+        fight = pygame.image.load("./resources/Fight Font/ft_063.png")
+        fight = pygame.transform.scale2x(fight)
+        screen.blit(fight, (SCREEN_WIDTH//2 - fight.get_width()//2, SCREEN_HEIGHT//2 - fight.get_height()//2))
+        pygame.display.flip()
+        pygame.time.delay(1000)
 
     screen.blit(field, (0, 0))
     screen.blit(item_surface, (0, 0))
     screen.blit(character_surface, (0, 0))
 
-# 更新 handle_battle_input 函數
+
 def handle_battle_input(event):
     global game_state
     key_mapping = {
@@ -248,8 +283,9 @@ def handle_battle_input(event):
         pygame.K_UP: "UP",
         pygame.K_LEFT: "LEFT",
         pygame.K_RIGHT: "RIGHT",
-        pygame.K_z: "PUNCH",  # Z鍵作為出拳鍵
-        pygame.K_x: "KICK"    # X鍵作為踢腿鍵
+        pygame.K_l: "PUNCH",  # Z鍵作為出拳鍵
+        pygame.K_x: "KICK",
+        pygame.K_q: "SHOOT" # X鍵作為踢腿鍵
     }
     # 更新玩家移動與攻擊
     if event.key == pygame.K_ESCAPE:
@@ -265,8 +301,8 @@ def handle_battle_input(event):
             player1.jump()
         elif event.key == pygame.K_f:
             player1.attack(10)
-            if player1.rect.colliderect(player2.rect): # 碰撞檢測
-                player2.health -= player1.attack_power
+            # if player1.rect.colliderect(player2.rect): # 攻擊碰撞檢測
+            #     player2.health -= player1.attack_power
         elif event.key == pygame.K_s:
             player1.block()
         elif event.key == pygame.K_e:
@@ -290,11 +326,6 @@ def handle_battle_input(event):
         if event.type == pygame.KEYDOWN:
             if event.key in key_mapping:
                 player2.handle_input(key_mapping[event.key])
-                if len(player2.projectiles) > 0:
-                    print('hehe')
-                    if player2.projectiles[-1].rect.colliderect(player1.rect):
-                        player1.health -= player2.attack_power
-                        print('hit')
             if event.key == pygame.K_LEFT:
                 player2.move(-20)
             elif event.key == pygame.K_RIGHT:
@@ -303,8 +334,8 @@ def handle_battle_input(event):
                 player2.jump()
             elif event.key == pygame.K_SPACE:
                 player2.attack(10)
-                if player2.rect.colliderect(player1.rect): # 碰撞檢測 
-                    player1.health -= player2.attack_power
+                # if player2.rect.colliderect(player1.rect): # 攻擊碰撞檢測 
+                #     player1.health -= player2.attack_power
             elif event.key == pygame.K_DOWN:
                 player2.block()
             elif event.key == pygame.K_RSHIFT:
@@ -393,8 +424,14 @@ if __name__ == "__main__":
             current_time = pygame.time.get_ticks()
             remaining_time = max(0, countdown - (current_time - start_time)//1000)
             # 繪製剩餘時間
-            font = pygame.font.Font(None, 74)
-            draw_text_centered(str(remaining_time), font, BLACK, item_surface, SCREEN_WIDTH//2, 50)
+            unit_digit = num_img[remaining_time % 10]
+            hundred_digit = num_img[remaining_time // 10]
+            item_surface.blit(unit_digit, (SCREEN_WIDTH//2, 20))
+            item_surface.blit(hundred_digit, (SCREEN_WIDTH//2 - hundred_digit.get_width(), 20))
+
+            # 碰撞檢測
+            detect_collision(player1, player2)
+            
             # 回合結束(時間到或有玩家血量歸零)
             if remaining_time == 0 or player1.health <= 0 or player2.health <= 0:
                 round += 1
@@ -408,6 +445,10 @@ if __name__ == "__main__":
                 else:
                     player1.health = 100
                     player2.health = 100
+                    player1.position.x = SCREEN_WIDTH//4 - player1.scaled_w//2
+                    player1.position.y = 400
+                    player2.position.x = SCREEN_WIDTH//4 * 3 - player2.scaled_w//2
+                    player2.position.y = 400
             draw_battle()
         elif game_state == STATE_RESULT:
             draw_result()
@@ -415,4 +456,3 @@ if __name__ == "__main__":
         # 更新畫面
         pygame.display.flip()
         clock.tick(FPS)
-
