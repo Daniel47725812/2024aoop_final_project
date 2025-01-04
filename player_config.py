@@ -24,7 +24,9 @@ def create_kirby_config():
             ),
             FighterState.JUMPING: AnimationConfig(
                 frames=mapping["jump"],
-                speed=0.1
+                speed=0.1,
+                loop=False,
+                next_state=FighterState.IDLE
             ),
             FighterState.ATTACKING: AnimationConfig(
                 frames=mapping["attack"],
@@ -33,7 +35,7 @@ def create_kirby_config():
                 next_state=FighterState.IDLE,
                 hitboxes=[
                             HitboxData(0.2, 0.1, 0.6, 0.8, False),  # 身體碰撞箱
-                            HitboxData(0.8, 0.3, 0.3, 0.2, True)   # 拳頭攻擊判定
+                            HitboxData(0.8, 0.5, 0.3, 0.2, True)   # 拳頭攻擊判定
                         ]
             ),
             FighterState.DASH: AnimationConfig(
@@ -49,7 +51,8 @@ def create_kirby_config():
             FighterState.SHOOT: AnimationConfig(
                 frames=mapping["shoot"],
                 speed=0.1,
-                loop=False
+                loop=False,
+                next_state=FighterState.IDLE
             )
             
         },
@@ -78,7 +81,9 @@ def create_ryu_config():
             ),
             FighterState.JUMPING: AnimationConfig(
                 frames=mapping["jump"],
-                speed=0.1
+                speed=0.1,
+                loop=False,
+                next_state=FighterState.IDLE
             ),
             FighterState.ATTACKING: AnimationConfig(
                 frames=mapping["attack"],
@@ -87,12 +92,12 @@ def create_ryu_config():
                 next_state=FighterState.IDLE,
                 hitboxes=[
                             HitboxData(0.2, 0.1, 0.6, 0.8, False),  # 身體碰撞箱
-                            HitboxData(1.0, 0.3, 0.3, 0.2, True)   # 拳頭攻擊判定
+                            HitboxData(1.0, 0.09, 0.3, 0.2, True)   # 拳頭攻擊判定
                         ]
             ),
             FighterState.DASH: AnimationConfig(
                 frames=mapping["dash"],
-                speed=0.1
+                speed=0.05
             ),
             FighterState.BLOCKING: AnimationConfig(
                 frames=mapping["block"],
@@ -101,7 +106,8 @@ def create_ryu_config():
             FighterState.SHOOT: AnimationConfig(
                 frames=mapping["shoot"],
                 speed=0.1,
-                loop=False
+                loop=False,
+                next_state=FighterState.IDLE
             )
             
         },
