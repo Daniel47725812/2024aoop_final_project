@@ -50,7 +50,7 @@ def init_game():
 
 # 載入圖片
 def load_image():
-    global menu, bg, point_img, blood_bar_0, blood_bar_1, blood_bar_2, num_img, round_img
+    global menu, bg, point_img, blood_bar_0, blood_bar_1, blood_bar_2, num_img, round_img, dash_img, skill_img, cd_img
 
     menu = pygame.image.load("./resources/Fight Font/image.png")
     menu = pygame.transform.scale(menu, (SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -82,6 +82,16 @@ def load_image():
     for i in range(4):
         round_img.append(pygame.image.load(f"./resources/Fight Font/ft_{(i+51):03d}.png"))
         round_img[i] = pygame.transform.scale2x(round_img[i])
+    
+    dash_img = pygame.image.load("./resources/Fight Font/dash.png")
+    dash_img = pygame.transform.scale(dash_img, (50, 50))
+
+    skill_img = pygame.image.load("./resources/Fight Font/fire_ball.png")
+    skill_img = pygame.transform.scale(skill_img, (50, 50))
+
+    cd_img = pygame.image.load("./resources/Fight Font/icon.png")
+    cd_img = pygame.transform.scale(cd_img, (70, 70))
+
 
 def draw_text_centered(text, font, color, surface, x, y):
     # 渲染文字
@@ -202,6 +212,8 @@ def handle_field_input(event):
     if event.key == pygame.K_RETURN:
         game_state = STATE_BATTLE
         start_time = pygame.time.get_ticks()
+
+   
     
 def simulate_keypress(key):
     global pre_key
@@ -296,6 +308,8 @@ def draw_battle():
         if goal2 > 1:
             item_surface.blit(point_img, (640, 20))
     if remaining_time == countdown:
+        screen.blit(field, (0, 0))
+        screen.blit(blur_surface, (0, 0))
         screen.blit(round_img[0], (SCREEN_WIDTH//2 - round_img[0].get_width()//5*3, SCREEN_HEIGHT//2 - round_img[0].get_height()//2))
         screen.blit(round_img[round], (SCREEN_WIDTH//2 + round_img[0].get_width()//5*2, SCREEN_HEIGHT//2 - round_img[round].get_height()//2))
         pygame.display.flip()
@@ -308,6 +322,33 @@ def draw_battle():
         screen.blit(fight, (SCREEN_WIDTH//2 - fight.get_width()//2, SCREEN_HEIGHT//2 - fight.get_height()//2))
         pygame.display.flip()
         pygame.time.delay(1000)
+
+    # 繪製技能冷卻
+    item_surface.blit(dash_img, (50, 530))
+    item_surface.blit(dash_img, (1150, 530))
+    item_surface.blit(skill_img, (125, 530))
+    item_surface.blit(skill_img, (1085, 530))
+    item_surface.blit(cd_img, (40, 520))
+    item_surface.blit(cd_img, (1140, 520))
+    item_surface.blit(cd_img, (110, 520))
+    item_surface.blit(cd_img, (1070, 520))
+
+    if player1.config.cooldowns["DASH"] > 0:
+        pygame.draw.circle(character_surface, (255, 255, 255, 200), (75, 555), 25, 25)
+        font = pygame.font.Font(None, 24)
+        draw_text_centered(str(int(player1.config.cooldowns["DASH"])+1), font, BLACK, character_surface, 75, 555)
+    if player1.config.cooldowns["SHOOT"] > 0:
+        pygame.draw.circle(character_surface, (255, 255, 255, 200), (150, 555), 25, 25)
+        font = pygame.font.Font(None, 24)
+        draw_text_centered(str(int(player1.config.cooldowns["SHOOT"])+1), font, BLACK, character_surface, 150, 555)
+    if player2.config.cooldowns["DASH"] > 0:
+        pygame.draw.circle(character_surface, (255, 255, 255, 200), (1175, 555), 25, 25)
+        font = pygame.font.Font(None, 24)
+        draw_text_centered(str(int(player2.config.cooldowns["DASH"])+1), font, BLACK, character_surface, 1175, 555)
+    if player2.config.cooldowns["SHOOT"] > 0:
+        pygame.draw.circle(character_surface, (255, 255, 255, 200), (1110, 555), 25, 25)
+        font = pygame.font.Font(None, 24)
+        draw_text_centered(str(int(player2.config.cooldowns["SHOOT"])+1), font, BLACK, character_surface, 1110, 555)
 
     screen.blit(field, (0, 0))
     screen.blit(item_surface, (0, 0))
@@ -393,11 +434,17 @@ def draw_result():
     screen.blit(item_surface, (0, 0))
     screen.blit(character_surface, (0, 0))
     font = pygame.font.Font(None, 74)
-    draw_text_centered("Game Over", font, BLACK, screen, SCREEN_WIDTH//2, SCREEN_HEIGHT//2 - 100)
+    # draw_text_centered("Game Over", font, BLACK, screen, SCREEN_WIDTH//2, SCREEN_HEIGHT//2 - 100)
     if goal1 > goal2:
-        draw_text_centered("Player 1 Wins", font, BLACK, screen, SCREEN_WIDTH//2, SCREEN_HEIGHT//2)
+        winner = pygame.image.load('./resources/Fight Font/ft_033.png')
+    elif goal1 < goal2:
+        winner = pygame.image.load('./resources/Fight Font/ft_034.png')
+    elif player1.health > player2.health:
+        winner = pygame.image.load('./resources/Fight Font/ft_033.png')
     else:
-        draw_text_centered("Player 2 Wins", font, BLACK, screen, SCREEN_WIDTH//2, SCREEN_HEIGHT//2)
+        winner = pygame.image.load('./resources/Fight Font/ft_034.png')
+    winner = pygame.transform.scale2x(winner)
+    screen.blit(winner, (SCREEN_WIDTH//2 - winner.get_width()//2, SCREEN_HEIGHT//2 - winner.get_height()//2))
     draw_text_centered("Press R to Restart", font, BLACK, screen, SCREEN_WIDTH//2, SCREEN_HEIGHT//2 + 100)
 
 def handle_result_input(event):
@@ -451,8 +498,11 @@ if __name__ == "__main__":
         elif game_state == STATE_BATTLE:
             item_surface.fill((0, 0, 0, 0))
             character_surface.fill((0, 0, 0, 0))
+
+            # 電腦模式
             if num_players == 1:
                 ai_player_logic()
+            
             # 計算剩餘時間
             current_time = pygame.time.get_ticks()
             remaining_time = max(0, countdown - (current_time - start_time)//1000)
@@ -476,6 +526,15 @@ if __name__ == "__main__":
                 if round > 3 or goal1 == 2 or goal2 == 2:
                     game_state = STATE_RESULT
                 else:
+                    ko = pygame.image.load("./resources/Fight Font/ft_030.png")
+                    ko = pygame.transform.scale2x(ko)
+                    if player1.health <= 0:
+                        screen.blit(blood_bar_0, (50, 30))
+                    else:
+                        screen.blit(blood_bar_0, (750, 30))
+                    screen.blit(ko, (SCREEN_WIDTH//2 - ko.get_width()//2, SCREEN_HEIGHT//2 - ko.get_height()//2))
+                    pygame.display.flip()
+                    pygame.time.delay(1000)
                     player1.health = 100
                     player2.health = 100
                     player1.position.x = SCREEN_WIDTH//4 - player1.scaled_w//2
