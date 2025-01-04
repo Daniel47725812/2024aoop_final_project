@@ -14,7 +14,12 @@ def create_kirby_config():
         sprite_sheet_path="resources/fighter/kirby_trans.png",
         base_width=32,
         base_height=32,
-        scale=6.0,
+        scale=5.0,
+        health=100,
+        attack_power=10,
+        speed=10,
+        jump_power=-600.0,
+        
         animations={
             FighterState.IDLE: AnimationConfig(
                 frames=mapping["idle"],

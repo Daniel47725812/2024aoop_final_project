@@ -178,7 +178,7 @@ class BasePlayer(pygame.sprite.Sprite):
     
     def _handle_physics(self, delta_time: float):
         if not self.on_ground:
-            self.velocity.y += 10  # 重力
+            self.velocity.y += 15  # 重力
         
         self.position += self.velocity * delta_time
         
