@@ -2,7 +2,7 @@ from BasePlayer import BasePlayer
 from player_config import create_kirby_config, create_ryu_config
 import json
 from typing import Dict, List, Tuple
-from Projectile import ProjectileType, ProjectileConfig, ProjectileHitboxData
+from Projectile import ProjectileType, ProjectileConfig, ProjectileHitboxData, Projectile
 
 def read_sprite_map(file_path: str) -> Dict[str, List[Tuple[int, int, int, int]]]:
     with open(file_path, 'r', encoding='utf-8') as f:
@@ -12,7 +12,7 @@ class Kirby(BasePlayer):
     def __init__(self, x: int, y: int):
         super().__init__(x, y, create_kirby_config())
         mapping = read_sprite_map("resources/fighter/kirby_trans_mapping.json")
-        self.projectile_configs[ProjectileType.WAVE] = ProjectileConfig(
+        self.projectile_configs[ProjectileType.FIREBALL] = ProjectileConfig(
             sprite_sheet_path="resources/fighter/kirby_trans.png",
             frames=mapping["hehe"],
             speed=300,
@@ -21,11 +21,7 @@ class Kirby(BasePlayer):
             scale=1.5,
             animation_speed=0.01
         )
-    
-    def perform_special_move(self, move_name: str):
-        super().perform_special_move(move_name)
-        if move_name == "INHALE":
-            self.shoot(ProjectileType.WAVE)
+        
        
 class Ryu(BasePlayer):
     def __init__(self, x: int, y: int):

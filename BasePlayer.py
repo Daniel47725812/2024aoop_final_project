@@ -2,7 +2,6 @@ import pygame
 from enum import Enum
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
-import json
 from Projectile import Projectile, ProjectileConfig, ProjectileType
 
 class FighterState(Enum):
@@ -37,6 +36,7 @@ class AnimationConfig:
     speed: float
     loop: bool = True
     next_state: Optional[FighterState] = None
+    hitboxes: List[HitboxData] = None
 
 @dataclass
 class CharacterConfig:
@@ -100,6 +100,7 @@ class BasePlayer(pygame.sprite.Sprite):
         self.on_ground = False
         self.is_attacking = False
         self.is_blocking = False
+        self.hit = False
         self.default_cooldown = self.config.cooldowns.copy()
         
         # 碰撞箱設置
@@ -126,14 +127,14 @@ class BasePlayer(pygame.sprite.Sprite):
             if self.current_frame_index < len(animation.frames) - 1:
                 self.current_frame_index += 1
             else:
+                if self.state == FighterState.ATTACKING:
+                    self.hit = False
                 if animation.loop:
                     self.current_frame_index = 0
                 elif animation.next_state:
                     self.change_state(animation.next_state)
                 else:
                     self.change_state(FighterState.IDLE)
-                    if self.state == FighterState.ATTACKING:
-                        self.is_attacking = False  # 结束攻击状态
 
     def _get_current_frame(self) -> pygame.Surface:
         animation = self._get_current_animation()
@@ -155,7 +156,7 @@ class BasePlayer(pygame.sprite.Sprite):
         # 翻轉
         if not self.facing_right:
             frame = pygame.transform.flip(frame, True, False)
-            
+        
         return frame, (frame_data["offset_x"], frame_data["offset_y"]) 
     
     def change_state(self, new_state: FighterState):
@@ -171,7 +172,6 @@ class BasePlayer(pygame.sprite.Sprite):
         self._handle_physics(delta_time)
         self._update_animation(delta_time)
         self._update_hitboxes()
-        self._update_input_buffer(delta_time)
         for state, cooldown in self.config.cooldowns.items():
             if cooldown > 0:
                 self.config.cooldowns[state] -= delta_time
@@ -228,9 +228,8 @@ class BasePlayer(pygame.sprite.Sprite):
         self.base_rect.y = self.position.y
         
         # 如果當前幀有特定的碰撞箱配置
-        '''
-        if frame_data.hitboxes:
-            for hitbox_data in frame_data.hitboxes:
+        if self.config.animations[self.state].hitboxes and not self.hit:
+            for hitbox_data in self.config.animations[self.state].hitboxes:
                 # 計算碰撞箱實際位置和大小
                 hitbox_rect = self._create_hitbox_from_data(hitbox_data)
                 
@@ -239,38 +238,9 @@ class BasePlayer(pygame.sprite.Sprite):
                 else:
                     self.hitboxes.append(hitbox_rect)
         else:
-        '''
-            # 使用預設碰撞箱
-        default_hitbox = self._create_hitbox_from_data(self.config.default_hitbox)
-        self.hitboxes.append(default_hitbox)
+            default_hitbox = self._create_hitbox_from_data(self.config.default_hitbox)
+            self.hitboxes.append(default_hitbox)
     
-    def _update_input_buffer(self, delta_time: float):
-        self.input_timer += delta_time
-        if self.input_timer > 0.5:  # 清空超時的輸入
-            self.input_buffer.clear()
-            self.input_timer = 0
-    
-    def handle_input(self, input_string: str):
-        """處理輸入並檢查特殊技能"""
-        self.input_buffer.append(input_string)
-        self.input_timer = 0
-        
-        # 檢查是否觸發特殊技能
-        if self.config.special_moves:
-            for move_name, sequence in self.config.special_moves.items():
-                if self._check_input_sequence(sequence):
-                    self.perform_special_move(move_name)
-                    self.input_buffer.clear()
-                    break
-    
-    def _check_input_sequence(self, sequence: List[str]) -> bool:
-        if len(self.input_buffer) < len(sequence):
-            return False
-        return self.input_buffer[-len(sequence):] == sequence
-    
-    def perform_special_move(self, move_name: str):
-        """執行特殊技能（由子類實現具體效果）"""
-        self.change_state(FighterState.SPECIAL)
     
     def move(self, direction: float):
         if not self.is_attacking and not self.is_blocking:
@@ -297,19 +267,7 @@ class BasePlayer(pygame.sprite.Sprite):
             self.is_attacking = True
             self.attack_key_held = True
             self.change_state(FighterState.ATTACKING)
-            
-    def dash(self, direction: float):
-        if self.config.cooldowns["DASH"] > 0:
-            return
-        if not self.is_attacking and not self.is_blocking:
-            self.config.cooldowns["DASH"] = self.default_cooldown["DASH"]
-            self.dash_key_held = True
-            if self.facing_right:
-                self.move(direction)
-            elif not self.facing_right:
-                self.move(-direction)
-            self.change_state(FighterState.DASH)
-            
+        
     def shoot(self, projectile_type: ProjectileType):
         """發射投射物"""
         if self.config.cooldowns["SHOOT"] > 0:
@@ -326,23 +284,37 @@ class BasePlayer(pygame.sprite.Sprite):
                 direction=direction,
                 config=config
             )
-            
             self.projectiles.append(projectile)
+                 
+    def dash(self, direction: float):
+        if self.config.cooldowns["DASH"] > 0:
+            return
+        if not self.is_attacking and not self.is_blocking:
+            self.config.cooldowns["DASH"] = self.default_cooldown["DASH"]
+            self.dash_key_held = True
+            if self.facing_right:
+                self.move(direction)
+            elif not self.facing_right:
+                self.move(-direction)
+            self.change_state(FighterState.DASH)
+            
     
     def block(self):
         if not self.is_attacking:
             self.is_blocking = True
             self.change_state(FighterState.BLOCKING)
     
-    def check_collision(self, other_hitboxes: 'BasePlayer') -> bool:
+    def check_collision(self, other: 'BasePlayer') -> bool:
         # 檢查我方碰撞箱與對方攻擊箱的碰撞
         if self.is_blocking:
             return False  # 如果正在格擋，忽略碰撞
-            
+        
         for my_hitbox in self.hitboxes:
-            for other_attack_box in other_hitboxes:
-                if my_hitbox.colliderect(other_attack_box):
-                    return True
+            if len(other.attack_boxes) > 0:
+                for other_attack_box in other.attack_boxes:
+                    if my_hitbox.colliderect(other_attack_box):
+                        other.hit = True
+                        return True
         return False
 
     def draw_debug(self, screen: pygame.Surface):
@@ -356,6 +328,8 @@ class BasePlayer(pygame.sprite.Sprite):
     def draw(self, screen: pygame.Surface):
         current_frame, (offset_x, offset_y) = self._get_current_frame()
         # 考慮偏移量進行繪製
+        if not self.facing_right:
+            offset_x = -offset_x
         draw_pos = (self.position.x + offset_x * self.config.scale,
                    self.position.y + offset_y * self.config.scale)
         screen.blit(current_frame, draw_pos)

@@ -51,7 +51,7 @@ def init_game():
 def load_image():
     global menu, bg, point_img, blood_bar_0, blood_bar_1, blood_bar_2, num_img, round_img
 
-    menu = pygame.image.load("./resources/Fight Font/ft_019.png")
+    menu = pygame.image.load("./resources/Fight Font/image.png")
     menu = pygame.transform.scale(menu, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
     bg = []
@@ -180,14 +180,10 @@ def handle_character_select_input(event):
         game_state = STATE_FIELD_SELECT
         
 
-
-
-
 #選擇場景
 def draw_field_select():
     global field
-    # field = bg[field_num]
-    field = pygame.image.load("./resources/Fight Font/image.png")
+    field = bg[field_num]
     field = pygame.transform.scale(field, (SCREEN_WIDTH, SCREEN_HEIGHT))
     screen.blit(field, (0, 0))
     screen.blit(blur_surface, (0, 0))
@@ -210,10 +206,12 @@ def handle_field_input(event):
 
 def detect_collision(player1, player2):
     # 攻擊
-    if player1.is_attacking and player2.check_collision(player1.hitboxes):
+    if player2.check_collision(player1):
         player2.health -= player1.attack_power
+        print(len(player1.attack_boxes))
+        print('hehe')
         player1.is_attacking = False
-    if player2.is_attacking and player1.check_collision(player2.hitboxes):
+    if player1.check_collision(player2):
         player1.health -= player2.attack_power
         player2.is_attacking = False
     # 飛行物
