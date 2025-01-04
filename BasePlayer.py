@@ -11,7 +11,7 @@ class FighterState(Enum):
     ATTACKING = "attack"
     DASH = "dash"
     BLOCKING = "block"
-    SPECIAL = "special"
+    SHOOT = "shoot"
     
 @dataclass
 class HitboxData:
@@ -56,9 +56,6 @@ class CharacterConfig:
     # 動畫配置
     animations: Dict[FighterState, AnimationConfig] = None
     cooldowns: Dict[str, float] = None
-    
-    # 特殊技能配置
-    special_moves: Dict[str, List[str]] = None  # 招式指令表
     
 @dataclass
 class HitboxData:
@@ -107,7 +104,6 @@ class BasePlayer(pygame.sprite.Sprite):
         self.scaled_w = config.base_width * config.scale
         self.scaled_h = config.base_height * config.scale
         self.base_rect = pygame.Rect(x, y, self.scaled_w, self.scaled_h)
-        #self.hitbox = pygame.Rect(x, y, self.scaled_w * config.hit_box_scale[0], self.scaled_h * config.hit_box_scale[1])
         
         self.hitboxes: List[pygame.Rect] = []
         self.attack_boxes: List[pygame.Rect] = []
@@ -272,6 +268,7 @@ class BasePlayer(pygame.sprite.Sprite):
         """發射投射物"""
         if self.config.cooldowns["SHOOT"] > 0:
             return
+        self.change_state(FighterState.SHOOT)
         if projectile_type in self.projectile_configs:
             self.config.cooldowns["SHOOT"] = self.default_cooldown["SHOOT"]
             config = self.projectile_configs[projectile_type]

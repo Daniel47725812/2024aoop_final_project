@@ -46,16 +46,12 @@ def create_kirby_config():
                 frames=mapping["block"],
                 speed=0.1
             ),
-            FighterState.SPECIAL: AnimationConfig(
-                frames=mapping["special"],
-                speed=0.03,
-                loop=False,
-                next_state=FighterState.IDLE
+            FighterState.SHOOT: AnimationConfig(
+                frames=mapping["shoot"],
+                speed=0.1,
+                loop=False
             )
             
-        },
-        special_moves={
-            "INHALE": ["SHOOT"]
         },
         cooldowns={
             "SHOOT": 3.0,
@@ -102,16 +98,12 @@ def create_ryu_config():
                 frames=mapping["block"],
                 speed=0.1
             ),
-            FighterState.SPECIAL: AnimationConfig(
-                frames=mapping["special"],
-                speed=0.03,
-                loop=False,
-                next_state=FighterState.IDLE
+            FighterState.SHOOT: AnimationConfig(
+                frames=mapping["shoot"],
+                speed=0.1,
+                loop=False
             )
             
-        },
-        special_moves={
-            "HADOKEN": ["PUNCH"]
         },
         cooldowns={
             "SHOOT": 3.0,
