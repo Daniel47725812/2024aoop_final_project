@@ -22,6 +22,9 @@ class Kirby(BasePlayer):
             animation_speed=0.01
         )
         
+    def shoot(self):
+        self._shoot(ProjectileType.FIREBALL)
+        
        
 class Ryu(BasePlayer):
     def __init__(self, x: int, y: int):
@@ -43,8 +46,6 @@ class Ryu(BasePlayer):
                     )
         )
     
-    def perform_special_move(self, move_name: str):
-        super().perform_special_move(move_name)
-        if move_name == "HADOKEN":  # 波動拳
-            self.shoot(ProjectileType.WAVE)
+    def shoot(self):
+        self._shoot(ProjectileType.WAVE)
     

@@ -2,6 +2,7 @@ import pygame
 import sys
 from player import Kirby, Ryu
 from BasePlayer import FighterState
+import random
 
 # 初始化 Pygame
 pygame.init()
@@ -202,7 +203,46 @@ def handle_field_input(event):
         game_state = STATE_BATTLE
         start_time = pygame.time.get_ticks()
     
+def simulate_keypress(key):
+    global pre_key
+    event = pygame.event.Event(pygame.KEYUP, {"key": pre_key, "is_simulated": True})
+    pygame.event.post(event)
+    pre_key = key
+    event = pygame.event.Event(pygame.KEYDOWN, {"key": key, "is_simulated": True})
+    pygame.event.post(event)
 
+# computer
+last_ai_action_time = 0
+ai_action_interval = 0.5
+pre_key = None
+def ai_player_logic():
+    global last_ai_action_time, simulate_key
+    if pygame.time.get_ticks() - last_ai_action_time < ai_action_interval * 1000:
+        return
+    last_ai_action_time = pygame.time.get_ticks()
+    
+    # 角色距離
+    x = player1.position.x - player2.position.x
+    y = player1.position.y - player2.position.y
+    if random.random() < 0.05:
+        simulate_keypress(pygame.K_l)
+        print('shoot')
+    elif abs(x) > player1.scaled_w/1.6:
+        if x < 0:
+            simulate_keypress(pygame.K_LEFT)
+        else:
+            simulate_keypress(pygame.K_RIGHT)
+        if abs(x) > player1.scaled_w*2:
+            simulate_keypress(pygame.K_RSHIFT)
+    else:
+        if y < -player1.scaled_h:
+            simulate_keypress(pygame.K_UP)
+        elif random.random() < 0.5:
+            simulate_keypress(pygame.K_SPACE)
+        elif player2.health < 50:
+            simulate_keypress(pygame.K_DOWN)
+        else:
+            simulate_keypress(None)
 
 def detect_collision(player1, player2):
     # 攻擊
@@ -276,21 +316,10 @@ def draw_battle():
 
 def handle_battle_input(event):
     global game_state
-    key_mapping = {
-        pygame.K_DOWN: "DOWN",
-        pygame.K_UP: "UP",
-        pygame.K_LEFT: "LEFT",
-        pygame.K_RIGHT: "RIGHT",
-        pygame.K_l: "PUNCH",  # Z鍵作為出拳鍵
-        pygame.K_x: "KICK",
-        pygame.K_q: "SHOOT" # X鍵作為踢腿鍵
-    }
     # 更新玩家移動與攻擊
     if event.key == pygame.K_ESCAPE:
         game_state = STATE_RESULT
     if event.type == pygame.KEYDOWN:
-        if event.key in key_mapping:
-            player1.handle_input(key_mapping[event.key])
         if event.key == pygame.K_a:
             player1.move(-20)
         elif event.key == pygame.K_d:
@@ -305,6 +334,9 @@ def handle_battle_input(event):
             player1.block()
         elif event.key == pygame.K_e:
             player1.dash(50)
+        elif event.key == pygame.K_q:
+            player1.shoot()
+            
     if event.type == pygame.KEYUP:
         if event.key == pygame.K_f:  # 松开攻击键
             player1.attack_key_held = False
@@ -320,10 +352,8 @@ def handle_battle_input(event):
             player1.change_state(FighterState.IDLE)
     
     # 更新玩家2移動與攻擊
-    if num_players == 2:
+    if num_players == 2 or (hasattr(event, "is_simulated") and event.is_simulated):
         if event.type == pygame.KEYDOWN:
-            if event.key in key_mapping:
-                player2.handle_input(key_mapping[event.key])
             if event.key == pygame.K_LEFT:
                 player2.move(-20)
             elif event.key == pygame.K_RIGHT:
@@ -338,6 +368,9 @@ def handle_battle_input(event):
                 player2.block()
             elif event.key == pygame.K_RSHIFT:
                 player2.dash(50)
+            elif event.key == pygame.K_l:
+                player2.shoot()
+                
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_SPACE:  # 松开攻击键
                 player2.attack_key_held = False
@@ -418,6 +451,8 @@ if __name__ == "__main__":
         elif game_state == STATE_BATTLE:
             item_surface.fill((0, 0, 0, 0))
             character_surface.fill((0, 0, 0, 0))
+            if num_players == 1:
+                ai_player_logic()
             # 計算剩餘時間
             current_time = pygame.time.get_ticks()
             remaining_time = max(0, countdown - (current_time - start_time)//1000)

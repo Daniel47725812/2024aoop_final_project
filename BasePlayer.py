@@ -268,7 +268,7 @@ class BasePlayer(pygame.sprite.Sprite):
             self.attack_key_held = True
             self.change_state(FighterState.ATTACKING)
         
-    def shoot(self, projectile_type: ProjectileType):
+    def _shoot(self, projectile_type: ProjectileType):
         """發射投射物"""
         if self.config.cooldowns["SHOOT"] > 0:
             return
