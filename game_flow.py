@@ -1,8 +1,9 @@
 import pygame
 import sys
-from player import Kirby, Ryu
+from player_config import Kirby, Ryu, Retsu
 from BasePlayer import FighterState
 import random
+import gif_pygame
 
 # 初始化 Pygame
 pygame.init()
@@ -43,8 +44,8 @@ def init_game():
     round = 1                   # 遊戲回合
     goal1 = 0                   # 1p得分
     goal2 = 0                   # 2p得分
-    characters = [Kirby(0, 0), Ryu(0, 0)]
-    characters2 = [Kirby(0, 0), Ryu(0, 0)]
+    characters = [Kirby(0, 0), Ryu(0, 0), Retsu(0, 0)]
+    characters2 = [Kirby(0, 0), Ryu(0, 0), Retsu(0, 0)]
     player1 = characters[0]
     player2 = characters2[0]
 
@@ -56,12 +57,12 @@ def load_image():
     menu = pygame.transform.scale(menu, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
     bg = []
-    temp = pygame.image.load("./resources/background/bg1.png")
-    bg.append(pygame.transform.scale(temp, (SCREEN_WIDTH, SCREEN_HEIGHT)))
-    temp = pygame.image.load("./resources/background/bg2.png")
-    bg.append(pygame.transform.scale(temp, (SCREEN_WIDTH, SCREEN_HEIGHT)))
-    temp = pygame.image.load("./resources/background/bg3.png")
-    bg.append(pygame.transform.scale(temp, (SCREEN_WIDTH, SCREEN_HEIGHT)))
+    temp = gif_pygame.load("resources/background/bg1_t.gif")
+    bg.append(temp)
+    temp1 = gif_pygame.load("resources/background/bg2_t.gif")
+    bg.append(temp1)
+    temp2 = gif_pygame.load("resources/background/bg3_t.gif")
+    bg.append(temp2)
 
     point_img = pygame.image.load("./resources/Fight Font/coin.png")
     point_img = pygame.transform.scale(point_img, (50, 50))
@@ -194,8 +195,7 @@ def handle_character_select_input(event):
 #選擇場景
 def draw_field_select():
     global field
-    field = bg[field_num]
-    field = pygame.transform.scale(field, (SCREEN_WIDTH, SCREEN_HEIGHT))
+    field = bg[field_num].blit_ready()
     screen.blit(field, (0, 0))
     screen.blit(blur_surface, (0, 0))
     font = pygame.font.Font(None, 74)
@@ -260,8 +260,6 @@ def detect_collision(player1, player2):
     # 攻擊
     if player2.check_collision(player1):
         player2.health -= player1.attack_power
-        print(len(player1.attack_boxes))
-        print('hehe')
         player1.is_attacking = False
     if player1.check_collision(player2):
         player1.health -= player2.attack_power
@@ -281,7 +279,7 @@ def detect_collision(player1, player2):
 # 更新 draw_battle 函數
 def draw_battle():
     global game_state, round, goal1, goal2, blood_bar_0, blood_bar_1, blood_bar_2
-
+    field = bg[field_num].blit_ready()
     # 繪製玩家
     player1.draw(character_surface)
     player1.draw_debug(character_surface)  
@@ -376,7 +374,10 @@ def handle_battle_input(event):
         elif event.key == pygame.K_e:
             player1.dash(50)
         elif event.key == pygame.K_q:
-            player1.shoot()
+            if player1 == characters[2]:
+                player1.shoot(player2)
+            else:
+                player1.shoot()
             
     if event.type == pygame.KEYUP:
         if event.key == pygame.K_f:  # 松开攻击键
@@ -410,7 +411,10 @@ def handle_battle_input(event):
             elif event.key == pygame.K_RSHIFT:
                 player2.dash(50)
             elif event.key == pygame.K_l:
-                player2.shoot()
+                if player2 == characters2[2]:
+                    player2.shoot(player1)
+                else:
+                    player2.shoot()
                 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_SPACE:  # 松开攻击键
@@ -514,6 +518,18 @@ if __name__ == "__main__":
 
             # 碰撞檢測
             detect_collision(player1, player2)
+            
+            if player1 == characters[2] and player1.state == FighterState.SHOOT:
+                if abs(player1.position.x - player2.position.x) < 30:
+                    player1.velocity.x = 0
+                    player1.health -= 30
+                    player1.change_state(FighterState.IDLE)
+            if player2 == characters2[2] and player2.state == FighterState.SHOOT:
+                if abs(player1.position.x - player2.position.x) < 30:
+                    player2.velocity.x = 0
+                    player1.health -= 30
+                    player2.change_state(FighterState.IDLE)
+            
             
             # 回合結束(時間到或有玩家血量歸零)
             if remaining_time == 0 or player1.health <= 0 or player2.health <= 0:

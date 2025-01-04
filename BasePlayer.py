@@ -123,7 +123,7 @@ class BasePlayer(pygame.sprite.Sprite):
             if self.current_frame_index < len(animation.frames) - 1:
                 self.current_frame_index += 1
             else:
-                if self.state == FighterState.ATTACKING:
+                if self.state == FighterState.ATTACKING or self.state == FighterState.SHOOT:
                     self.hit = False
                 if animation.loop:
                     self.current_frame_index = 0
@@ -187,7 +187,7 @@ class BasePlayer(pygame.sprite.Sprite):
             self.position.y = 580 - self.scaled_h
             self.velocity.y = 0
             self.on_ground = True
-        if self.position.x < 100 and self.velocity.x < 0:
+        if self.position.x < 0 and self.velocity.x < 0:
             self.velocity.x = 0
             return
         elif self.position.x > 1200 - self.scaled_w and self.velocity.x > 0:

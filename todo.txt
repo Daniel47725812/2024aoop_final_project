@@ -1,9 +1,6 @@
 jerry:
-1. 找retsu的替代角色
-2. mapping 第三個角色
-4. 地面對齊
-5. dash 優化
-6. 背景gif（時間允許）
+1. dash 優化
+
 
 daniel:
-1. cd美術（有時間再用）
+1. cd位置優化
