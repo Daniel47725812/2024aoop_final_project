@@ -323,30 +323,30 @@ def draw_battle():
 
     # 繪製技能冷卻
     item_surface.blit(dash_img, (50, 530))
-    item_surface.blit(dash_img, (1150, 530))
+    item_surface.blit(dash_img, (1080, 530))
     item_surface.blit(skill_img, (125, 530))
-    item_surface.blit(skill_img, (1085, 530))
+    item_surface.blit(skill_img, (1015, 530))
     item_surface.blit(cd_img, (40, 520))
-    item_surface.blit(cd_img, (1140, 520))
-    item_surface.blit(cd_img, (110, 520))
     item_surface.blit(cd_img, (1070, 520))
+    item_surface.blit(cd_img, (110, 520))
+    item_surface.blit(cd_img, (1000, 520))
 
     if player1.config.cooldowns["DASH"] > 0:
         pygame.draw.circle(character_surface, (255, 255, 255, 200), (75, 555), 25, 25)
         font = pygame.font.Font(None, 24)
         draw_text_centered(str(int(player1.config.cooldowns["DASH"])+1), font, BLACK, character_surface, 75, 555)
     if player1.config.cooldowns["SHOOT"] > 0:
-        pygame.draw.circle(character_surface, (255, 255, 255, 200), (150, 555), 25, 25)
+        pygame.draw.circle(character_surface, (255, 255, 255, 200), (148, 555), 25, 25)
         font = pygame.font.Font(None, 24)
-        draw_text_centered(str(int(player1.config.cooldowns["SHOOT"])+1), font, BLACK, character_surface, 150, 555)
+        draw_text_centered(str(int(player1.config.cooldowns["SHOOT"])+1), font, BLACK, character_surface, 148, 555)
     if player2.config.cooldowns["DASH"] > 0:
-        pygame.draw.circle(character_surface, (255, 255, 255, 200), (1175, 555), 25, 25)
+        pygame.draw.circle(character_surface, (255, 255, 255, 200), (1105, 555), 25, 25)
         font = pygame.font.Font(None, 24)
-        draw_text_centered(str(int(player2.config.cooldowns["DASH"])+1), font, BLACK, character_surface, 1175, 555)
+        draw_text_centered(str(int(player2.config.cooldowns["DASH"])+1), font, BLACK, character_surface, 1105, 555)
     if player2.config.cooldowns["SHOOT"] > 0:
-        pygame.draw.circle(character_surface, (255, 255, 255, 200), (1110, 555), 25, 25)
+        pygame.draw.circle(character_surface, (255, 255, 255, 200), (1038, 555), 25, 25)
         font = pygame.font.Font(None, 24)
-        draw_text_centered(str(int(player2.config.cooldowns["SHOOT"])+1), font, BLACK, character_surface, 1110, 555)
+        draw_text_centered(str(int(player2.config.cooldowns["SHOOT"])+1), font, BLACK, character_surface, 1038, 555)
 
     screen.blit(field, (0, 0))
     screen.blit(item_surface, (0, 0))
