@@ -13,7 +13,7 @@ class FrameData:
     offset_x: float = 0
     offset_y: float = 0
 
-class EnhancedSpriteMapper:
+class SpriteMapper:
     def __init__(self, image_path, sprite_width, sprite_height):
         pygame.init()
         self.original_image = pygame.image.load(image_path)
@@ -203,7 +203,7 @@ def main():
     sprite_width = int(sys.argv[2])
     sprite_height = int(sys.argv[3])
     
-    mapper = EnhancedSpriteMapper(image_path, sprite_width, sprite_height)
+    mapper = SpriteMapper(image_path, sprite_width, sprite_height)
     mapper.run()
 
 if __name__ == "__main__":

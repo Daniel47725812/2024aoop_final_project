@@ -1,6 +1,13 @@
+#readme 分工
+
 jerry:
-1. dash 優化
+1. 
 
 
 daniel:
-1. cd位置優化
+1. 
+
+installation（如何使用）
+遊戲規則（flow、遊戲制度、模式）
+按鍵配置
+角色招式說明/特色說明
