@@ -1,13 +1,19 @@
 #readme 分工
 
 jerry:
-1. 
+1. 按鍵配置
+2. 角色招式說明/特色說明
 
 
 daniel:
-1. 
+1. installation（如何使用）
+2. 遊戲規則（flow、遊戲制度、模式）
 
+架構：
 installation（如何使用）
 遊戲規則（flow、遊戲制度、模式）
 按鍵配置
 角色招式說明/特色說明
+程式架構：
+1. 流程圖
+2. class diagram
