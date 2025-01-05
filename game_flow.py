@@ -160,11 +160,11 @@ def draw_character_select():
     else:
         draw_text_centered("Computer", font, BLACK, screen, SCREEN_WIDTH//4 * 3, 200)
     player1.position.x = SCREEN_WIDTH//4 - player1.scaled_w//2
-    player1.position.y = 400
+    player1.position.y = 500 - player1.scaled_h
     player1.draw(character_surface)
     player1.update(1/60)
     player2.position.x = SCREEN_WIDTH//4 * 3 - player2.scaled_w//2
-    player2.position.y = 400
+    player2.position.y = 500 - player2.scaled_h
     player2.draw(character_surface)
     player2.update(1/60)
 
@@ -238,7 +238,6 @@ def ai_player_logic():
     y = player1.position.y - player2.position.y
     if random.random() < 0.05:
         simulate_keypress(pygame.K_l)
-        print('shoot')
     elif abs(x) > player1.scaled_w/1.6:
         if x < 0:
             simulate_keypress(pygame.K_LEFT)

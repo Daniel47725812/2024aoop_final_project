@@ -189,8 +189,8 @@ class BasePlayer(pygame.sprite.Sprite):
         self.position += self.velocity * delta_time
         
         # 基本地面碰撞
-        if self.position.y > 580 - self.scaled_h:  # 這裡應該由遊戲系統提供真實的地面高度
-            self.position.y = 580 - self.scaled_h
+        if self.position.y > 530 - self.scaled_h:  # 這裡應該由遊戲系統提供真實的地面高度
+            self.position.y = 530 - self.scaled_h
             self.velocity.y = 0
             self.on_ground = True
         if self.position.x < 0 and self.velocity.x < 0:
