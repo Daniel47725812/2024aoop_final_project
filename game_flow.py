@@ -32,6 +32,9 @@ STATE_FIELD_SELECT = "field_select"
 STATE_BATTLE = "battle"
 STATE_RESULT = "result"
 
+# 定義字體
+font_path = "resources/Fight Font/ARCADECLASSIC.TTF"
+
 # 初始遊戲狀態
 def init_game():
     global game_state, player_count_selection, field_num, countdown, start_time, round, goal1, goal2, player1, player2, characters, characters2
@@ -108,7 +111,7 @@ def draw_menu():
     screen.blit(menu, (0, 0))
     blur_surface.fill((255, 255, 255, 100))
     screen.blit(blur_surface, (0, 0))
-    font = pygame.font.Font(None, 74)
+    font = pygame.font.Font(font_path, 74)
     draw_text_centered("Press Any Key to Start", font, BLACK, screen, SCREEN_WIDTH//2, SCREEN_HEIGHT//2)
 
 
@@ -117,7 +120,7 @@ def draw_menu():
 def draw_player_select():
     screen.blit(menu, (0, 0))
     screen.blit(blur_surface, (0, 0))
-    font = pygame.font.Font(None, 74)
+    font = pygame.font.Font(font_path, 74)
     draw_text_centered("Select Number of Players", font, BLACK, screen, SCREEN_WIDTH//2, 150)
 
     # 繪製玩家人數選項
@@ -147,7 +150,7 @@ player2_selection = 0
 num_players = 1  # 默認只有一位玩家
 
 def draw_character_select():
-    font = pygame.font.Font(None, 74)
+    font = pygame.font.Font(font_path, 74)
     screen.blit(menu, (0, 0))
     screen.blit(blur_surface, (0, 0))
     
@@ -198,7 +201,7 @@ def draw_field_select():
     field = bg[field_num].blit_ready()
     screen.blit(field, (0, 0))
     screen.blit(blur_surface, (0, 0))
-    font = pygame.font.Font(None, 74)
+    font = pygame.font.Font(font_path, 74)
     draw_text_centered("field" + str(field_num + 1), font, BLACK, screen, SCREEN_WIDTH//2, SCREEN_HEIGHT//2)
 
 def handle_field_input(event):
@@ -330,19 +333,19 @@ def draw_battle():
 
     if player1.config.cooldowns["DASH"] > 0:
         pygame.draw.circle(character_surface, (255, 255, 255, 200), (75, 555), 25, 25)
-        font = pygame.font.Font(None, 24)
+        font = pygame.font.Font(font_path, 24)
         draw_text_centered(str(int(player1.config.cooldowns["DASH"])+1), font, BLACK, character_surface, 75, 555)
     if player1.config.cooldowns["SHOOT"] > 0:
         pygame.draw.circle(character_surface, (255, 255, 255, 200), (148, 555), 25, 25)
-        font = pygame.font.Font(None, 24)
+        font = pygame.font.Font(font_path, 24)
         draw_text_centered(str(int(player1.config.cooldowns["SHOOT"])+1), font, BLACK, character_surface, 148, 555)
     if player2.config.cooldowns["DASH"] > 0:
         pygame.draw.circle(character_surface, (255, 255, 255, 200), (1105, 555), 25, 25)
-        font = pygame.font.Font(None, 24)
+        font = pygame.font.Font(font_path, 24)
         draw_text_centered(str(int(player2.config.cooldowns["DASH"])+1), font, BLACK, character_surface, 1105, 555)
     if player2.config.cooldowns["SHOOT"] > 0:
         pygame.draw.circle(character_surface, (255, 255, 255, 200), (1038, 555), 25, 25)
-        font = pygame.font.Font(None, 24)
+        font = pygame.font.Font(font_path, 24)
         draw_text_centered(str(int(player2.config.cooldowns["SHOOT"])+1), font, BLACK, character_surface, 1038, 555)
 
     screen.blit(field, (0, 0))
@@ -424,7 +427,7 @@ def draw_result():
     screen.blit(blur_surface, (0, 0))
     screen.blit(item_surface, (0, 0))
     screen.blit(character_surface, (0, 0))
-    font = pygame.font.Font(None, 74)
+    font = pygame.font.Font(font_path, 74)
     # draw_text_centered("Game Over", font, BLACK, screen, SCREEN_WIDTH//2, SCREEN_HEIGHT//2 - 100)
     if goal1 > goal2:
         winner = pygame.image.load('./resources/Fight Font/ft_033.png')
