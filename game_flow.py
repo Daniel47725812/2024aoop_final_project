@@ -367,12 +367,10 @@ def handle_battle_input(event):
             player1.jump()
         elif event.key == pygame.K_f:
             player1.attack(10)
-            # if player1.rect.colliderect(player2.rect): # 攻擊碰撞檢測
-            #     player2.health -= player1.attack_power
         elif event.key == pygame.K_s:
             player1.block()
         elif event.key == pygame.K_e:
-            player1.dash(50)
+            player1.dash()
         elif event.key == pygame.K_q:
             if player1 == characters[2]:
                 player1.shoot(player2)
@@ -389,9 +387,6 @@ def handle_battle_input(event):
         elif event.key == pygame.K_s:
             player1.is_blocking = False
             player1.change_state(FighterState.IDLE)
-        elif event.key == pygame.K_e:
-            player1.velocity.x = 0
-            player1.change_state(FighterState.IDLE)
     
     # 更新玩家2移動與攻擊
     if num_players == 2 or (hasattr(event, "is_simulated") and event.is_simulated):
@@ -404,12 +399,10 @@ def handle_battle_input(event):
                 player2.jump()
             elif event.key == pygame.K_SPACE:
                 player2.attack(10)
-                # if player2.rect.colliderect(player1.rect): # 攻擊碰撞檢測 
-                #     player1.health -= player2.attack_power
             elif event.key == pygame.K_DOWN:
                 player2.block()
             elif event.key == pygame.K_RSHIFT:
-                player2.dash(50)
+                player2.dash()
             elif event.key == pygame.K_l:
                 if player2 == characters2[2]:
                     player2.shoot(player1)
@@ -425,9 +418,6 @@ def handle_battle_input(event):
                 player2.change_state(FighterState.IDLE)
             elif event.key == pygame.K_DOWN:
                 player2.is_blocking = False
-                player2.change_state(FighterState.IDLE)
-            elif event.key == pygame.K_RSHIFT:
-                player2.velocity.x = 0
                 player2.change_state(FighterState.IDLE)
 
 
@@ -519,15 +509,15 @@ if __name__ == "__main__":
             # 碰撞檢測
             detect_collision(player1, player2)
             
-            if player1 == characters[2] and player1.state == FighterState.SHOOT:
+            if player1 == characters[2] and player1.state == FighterState.SHOOT and player1.config.cooldowns["SHOOT"] > 0:
                 if abs(player1.position.x - player2.position.x) < 30:
                     player1.velocity.x = 0
-                    player1.health -= 30
+                    player2.health -= 20
                     player1.change_state(FighterState.IDLE)
-            if player2 == characters2[2] and player2.state == FighterState.SHOOT:
+            if player2 == characters2[2] and player2.state == FighterState.SHOOT and player2.config.cooldowns["SHOOT"] > 0:
                 if abs(player1.position.x - player2.position.x) < 30:
                     player2.velocity.x = 0
-                    player1.health -= 30
+                    player1.health -= 20
                     player2.change_state(FighterState.IDLE)
             
             

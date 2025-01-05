@@ -16,9 +16,9 @@ def create_kirby_config():
         base_height=32,
         scale=5.0,
         health=100,
-        attack_power=10,
-        speed=10,
-        jump_power=-600.0,
+        attack_power=5,
+        speed=12,
+        jump_power=-650.0,
         
         animations={
             FighterState.IDLE: AnimationConfig(
@@ -73,15 +73,15 @@ def create_kirby_config():
 class Kirby(BasePlayer):
     def __init__(self, x: int, y: int):
         super().__init__(x, y, create_kirby_config())
-        mapping = read_sprite_map("resources/fighter/kirby_trans_mapping.json")
+        mapping = read_sprite_map("resources/fighter/ryu_trans_mapping.json")
         self.projectile_configs[ProjectileType.FIREBALL] = ProjectileConfig(
-            sprite_sheet_path="resources/fighter/kirby_trans.png",
-            frames=mapping["hehe"],
+            sprite_sheet_path="resources/fighter/ryu_trans.png",
+            frames=mapping["kirby"],
             speed=300,
-            damage=50,
+            damage=20,
             lifetime=3,
             scale=1.5,
-            animation_speed=0.01
+            animation_speed=0.05
         )
         
     def shoot(self):
@@ -92,9 +92,13 @@ def create_ryu_config():
     mapping = read_sprite_map("resources/fighter/ryu_trans_mapping.json")
     return CharacterConfig(
         sprite_sheet_path="resources/fighter/ryu_trans.png",
-        base_width=110,
+        base_width=80,
         base_height=100,
         scale=2.0,
+        health=100,
+        attack_power=7,
+        speed=10,
+        jump_power=-600.0,
         animations={
             FighterState.IDLE: AnimationConfig(
                 frames=mapping["idle"],
@@ -117,12 +121,13 @@ def create_ryu_config():
                 next_state=FighterState.IDLE,
                 hitboxes=[
                             HitboxData(0.2, 0.1, 0.6, 0.8, False),  # 身體碰撞箱
-                            HitboxData(1.0, 0.09, 0.3, 0.2, True)   # 拳頭攻擊判定
+                            HitboxData(1.0, 0.09, 0.5, 0.2, True)   # 拳頭攻擊判定
                         ]
             ),
             FighterState.DASH: AnimationConfig(
                 frames=mapping["dash"],
-                speed=0.05
+                speed=0.05,
+                loop=False
             ),
             FighterState.BLOCKING: AnimationConfig(
                 frames=mapping["block"],
@@ -137,7 +142,7 @@ def create_ryu_config():
             
         },
         cooldowns={
-            "SHOOT": 3.0,
+            "SHOOT": 5.0,
             "ATTACK": 0.1,
             "DASH": 2.0
         }
@@ -151,7 +156,7 @@ class Ryu(BasePlayer):
             sprite_sheet_path="resources/fighter/ryu_trans.png",
             frames=mapping["hehe"],
             speed=300,
-            damage=50,
+            damage=40,
             lifetime=2,
             scale=1.5,
             animation_speed=0.1,
@@ -173,6 +178,10 @@ def create_restu_config():
         base_width=70,
         base_height=110,
         scale=2.0,
+        health=100,
+        attack_power=10,
+        speed=12,
+        jump_power=-700.0,
         animations={
             FighterState.IDLE: AnimationConfig(
                 frames=mapping["idle"],
@@ -195,12 +204,13 @@ def create_restu_config():
                 next_state=FighterState.IDLE,
                 hitboxes=[
                             HitboxData(0.2, 0.1, 0.6, 0.8, False),  # 身體碰撞箱
-                            HitboxData(1.0, 0.09, 0.3, 0.2, True)   # 拳頭攻擊判定
+                            HitboxData(1.2, 0.09, 0.5, 0.2, True)   # 拳頭攻擊判定
                         ]
             ),
             FighterState.DASH: AnimationConfig(
                 frames=mapping["dash"],
-                speed=0.05
+                speed=0.05,
+                loop=False
             ),
             FighterState.BLOCKING: AnimationConfig(
                 frames=mapping["block"],
@@ -219,7 +229,7 @@ def create_restu_config():
             
         },
         cooldowns={
-            "SHOOT": 3.0,
+            "SHOOT": 6.0,
             "ATTACK": 0.1,
             "DASH": 2.0
         }
@@ -230,13 +240,15 @@ class Retsu(BasePlayer):
         super().__init__(x, y, create_restu_config())
         
     def shoot(self, other: BasePlayer):
+        if self.config.cooldowns["SHOOT"] > 0:
+            return
+        self.config.cooldowns["SHOOT"] = 2.0
         self.change_state(FighterState.SHOOT)
         if self.facing_right:
             self.velocity.x = 1500
         else:
             self.velocity.x = -1500
         if self.position.x == other.position.x:
-            print("hit")
             self.velocity.x = 0
             self.change_state(FighterState.IDLE)
         

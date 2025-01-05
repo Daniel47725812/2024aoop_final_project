@@ -374,5 +374,79 @@
             "offset_x": 16,
             "offset_y": 3
         }
+    ],
+    "kirby": [
+        {
+            "x": 766,
+            "y": 1534,
+            "width": 80,
+            "height": 64,
+            "offset_x": 0,
+            "offset_y": 0
+        },
+        {
+            "x": 845,
+            "y": 1533,
+            "width": 86,
+            "height": 66,
+            "offset_x": 0,
+            "offset_y": 0
+        },
+        {
+            "x": 935,
+            "y": 1533,
+            "width": 86,
+            "height": 66,
+            "offset_x": 0,
+            "offset_y": 0
+        },
+        {
+            "x": 1029,
+            "y": 1535,
+            "width": 86,
+            "height": 66,
+            "offset_x": 0,
+            "offset_y": 0
+        },
+        {
+            "x": 751,
+            "y": 1594,
+            "width": 74,
+            "height": 56,
+            "offset_x": 0,
+            "offset_y": 0
+        },
+        {
+            "x": 815,
+            "y": 1594,
+            "width": 74,
+            "height": 56,
+            "offset_x": 0,
+            "offset_y": 0
+        },
+        {
+            "x": 871,
+            "y": 1596,
+            "width": 74,
+            "height": 56,
+            "offset_x": 0,
+            "offset_y": 0
+        },
+        {
+            "x": 935,
+            "y": 1598,
+            "width": 74,
+            "height": 56,
+            "offset_x": 0,
+            "offset_y": 0
+        },
+        {
+            "x": 1007,
+            "y": 1598,
+            "width": 74,
+            "height": 56,
+            "offset_x": 0,
+            "offset_y": 0
+        }
     ]
 }

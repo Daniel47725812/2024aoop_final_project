@@ -107,9 +107,7 @@ class BasePlayer(pygame.sprite.Sprite):
         
         self.hitboxes: List[pygame.Rect] = []
         self.attack_boxes: List[pygame.Rect] = []
-        # 特殊技能
-        self.input_buffer = []
-        self.input_timer = 0
+        self.dash_cooldown = 2
         
     def _get_current_animation(self) -> AnimationConfig:
         return self.config.animations[self.state]
@@ -171,6 +169,14 @@ class BasePlayer(pygame.sprite.Sprite):
         for state, cooldown in self.config.cooldowns.items():
             if cooldown > 0:
                 self.config.cooldowns[state] -= delta_time
+        if self.dash_key_held and self.dash_cooldown > 0:
+            self.dash_cooldown -= delta_time
+        if self.state == FighterState.IDLE:
+            self.velocity.x = 0
+        elif self.dash_cooldown <= 0 and self.dash_key_held:
+            self.dash_key_held = False
+            self.dash_cooldown = 1
+            self.change_state(FighterState.IDLE)
         for projectile in self.projectiles[:]:
             projectile.update(delta_time)
             if projectile.lifetime <= 0:
@@ -283,16 +289,16 @@ class BasePlayer(pygame.sprite.Sprite):
             )
             self.projectiles.append(projectile)
                  
-    def dash(self, direction: float):
+    def dash(self):
         if self.config.cooldowns["DASH"] > 0:
             return
         if not self.is_attacking and not self.is_blocking:
             self.config.cooldowns["DASH"] = self.default_cooldown["DASH"]
             self.dash_key_held = True
             if self.facing_right:
-                self.move(direction)
+                self.velocity.x = 100*self.speed
             elif not self.facing_right:
-                self.move(-direction)
+                self.velocity.x = -100*self.speed
             self.change_state(FighterState.DASH)
             
     
