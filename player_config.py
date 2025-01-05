@@ -204,7 +204,7 @@ def create_restu_config():
                 next_state=FighterState.IDLE,
                 hitboxes=[
                             HitboxData(0.2, 0.1, 0.6, 0.8, False),  # 身體碰撞箱
-                            HitboxData(1.2, 0.09, 0.5, 0.2, True)   # 拳頭攻擊判定
+                            HitboxData(1.2, 0.09, 0.5, 0.4, True)   # 拳頭攻擊判定
                         ]
             ),
             FighterState.DASH: AnimationConfig(
@@ -242,7 +242,7 @@ class Retsu(BasePlayer):
     def shoot(self, other: BasePlayer):
         if self.config.cooldowns["SHOOT"] > 0:
             return
-        self.config.cooldowns["SHOOT"] = 2.0
+        self.config.cooldowns["SHOOT"] = 6.0
         self.change_state(FighterState.SHOOT)
         if self.facing_right:
             self.velocity.x = 1500

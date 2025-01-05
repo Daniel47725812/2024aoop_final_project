@@ -375,6 +375,12 @@ def handle_battle_input(event):
         elif event.key == pygame.K_b:
             if player1 == characters[2]:
                 player1.shoot(player2)
+            elif player1 == characters[1] and len(player1.projectiles) > 0:
+                if player1.projectiles[-1].config.lifetime > 0:
+                        player1.position = player1.projectiles[-1].position
+                        if player1.position.y < 530 - player1.scaled_h:
+                                player1.on_ground = False
+                        player1.projectiles.pop()
             else:
                 player1.shoot()
             
@@ -407,6 +413,12 @@ def handle_battle_input(event):
             elif event.key == pygame.K_k:
                 if player2 == characters2[2]:
                     player2.shoot(player1)
+                elif player2 == characters2[1] and len(player2.projectiles) > 0:
+                    if player2.projectiles[-1].config.lifetime > 0:
+                            player2.position = player2.projectiles[-1].position
+                            if player2.position.y < 530 - player2.scaled_h:
+                                player2.on_ground = False
+                            player2.projectiles.pop()
                 else:
                     player2.shoot()
                 
@@ -512,12 +524,12 @@ if __name__ == "__main__":
             detect_collision(player1, player2)
             
             if player1 == characters[2] and player1.state == FighterState.SHOOT and player1.config.cooldowns["SHOOT"] > 0:
-                if abs(player1.position.x - player2.position.x) < 30:
+                if abs(player1.position.x - player2.position.x) < 100:
                     player1.velocity.x = 0
                     player2.health -= 20
                     player1.change_state(FighterState.IDLE)
             if player2 == characters2[2] and player2.state == FighterState.SHOOT and player2.config.cooldowns["SHOOT"] > 0:
-                if abs(player1.position.x - player2.position.x) < 30:
+                if abs(player1.position.x - player2.position.x) < 100:
                     player2.velocity.x = 0
                     player1.health -= 20
                     player2.change_state(FighterState.IDLE)
