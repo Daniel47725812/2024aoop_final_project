@@ -1,0 +1,2 @@
+pygame=2.6.1
+gif-pygame=1.2.2
