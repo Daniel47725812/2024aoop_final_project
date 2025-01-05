@@ -105,9 +105,5 @@ class Projectile(pygame.sprite.Sprite):
             frame_surface = pygame.transform.scale(frame_surface, new_size)
             
         screen.blit(frame_surface, self.position)
-        
-    def draw_debug(self, screen: pygame.Surface):
-        """繪製碰撞箱（用於調試）"""
-        pygame.draw.rect(screen, (255, 0, 0), self.hitbox, 1)  # 紅色表示投射物碰撞箱
 
     

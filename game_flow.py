@@ -281,10 +281,8 @@ def draw_battle():
     field = bg[field_num].blit_ready()
     # 繪製玩家
     player1.draw(character_surface)
-    player1.draw_debug(character_surface)  
     player1.update(1/60)
     player2.draw(character_surface)
-    player2.draw_debug(character_surface)
     player2.update(1/60)
 
     # 繪製血量條

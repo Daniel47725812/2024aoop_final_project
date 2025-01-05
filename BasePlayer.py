@@ -319,14 +319,6 @@ class BasePlayer(pygame.sprite.Sprite):
                         other.hit = True
                         return True
         return False
-
-    def draw_debug(self, screen: pygame.Surface):
-        # 用於調試的繪製方法，顯示碰撞箱
-        for hitbox in self.hitboxes:
-            pygame.draw.rect(screen, (0, 255, 0), hitbox, 1)  # 綠色表示普通碰撞箱
-        
-        for attack_box in self.attack_boxes:
-            pygame.draw.rect(screen, (255, 0, 0), attack_box, 1)  # 紅色表示攻擊判定
             
     def draw(self, screen: pygame.Surface):
         current_frame, (offset_x, offset_y) = self._get_current_frame()
@@ -338,5 +330,4 @@ class BasePlayer(pygame.sprite.Sprite):
         screen.blit(current_frame, draw_pos)
         for projectile in self.projectiles:
             projectile.draw(screen)
-            projectile.draw_debug(screen)
         
