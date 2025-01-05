@@ -367,7 +367,7 @@ def handle_battle_input(event):
         elif event.key == pygame.K_w:
             player1.jump()
         elif event.key == pygame.K_f:
-            player1.attack(10)
+            player1.attack()
         elif event.key == pygame.K_s:
             player1.block()
         elif event.key == pygame.K_e:
@@ -399,7 +399,7 @@ def handle_battle_input(event):
             elif event.key == pygame.K_UP:
                 player2.jump()
             elif event.key == pygame.K_SPACE:
-                player2.attack(10)
+                player2.attack()
             elif event.key == pygame.K_DOWN:
                 player2.block()
             elif event.key == pygame.K_RSHIFT:

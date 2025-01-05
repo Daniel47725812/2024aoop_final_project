@@ -256,16 +256,12 @@ class BasePlayer(pygame.sprite.Sprite):
             self.on_ground = False
             self.change_state(FighterState.JUMPING)
     
-    def attack(self, direction: float):
+    def attack(self):
         if self.config.cooldowns["ATTACK"] > 0:
             return
         if not self.is_attacking and not self.is_blocking:
             self.config.cooldowns["ATTACK"] = self.default_cooldown["ATTACK"]
             self.attack_key_held = True
-            if self.facing_right:
-                self.move(direction)
-            elif not self.facing_right:
-                self.move(-direction)
             self.is_attacking = True
             self.attack_key_held = True
             self.change_state(FighterState.ATTACKING)
