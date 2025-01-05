@@ -245,19 +245,19 @@ def ai_player_logic():
     x = player1.position.x - player2.position.x
     y = player1.position.y - player2.position.y
     if random.random() < 0.05:
-        simulate_keypress(pygame.K_l)
+        simulate_keypress(pygame.K_k)
     elif abs(x) > player1.scaled_w/1.6:
         if x < 0:
             simulate_keypress(pygame.K_LEFT)
         else:
             simulate_keypress(pygame.K_RIGHT)
         if abs(x) > player1.scaled_w*2:
-            simulate_keypress(pygame.K_RSHIFT)
+            simulate_keypress(pygame.K_l)
     else:
         if y < -player1.scaled_h:
             simulate_keypress(pygame.K_UP)
         elif random.random() < 0.5:
-            simulate_keypress(pygame.K_SPACE)
+            simulate_keypress(pygame.K_SEMICOLON)
         elif player2.health < 50:
             simulate_keypress(pygame.K_DOWN)
         else:
@@ -366,13 +366,13 @@ def handle_battle_input(event):
             player1.move(20)
         elif event.key == pygame.K_w:
             player1.jump()
-        elif event.key == pygame.K_f:
+        elif event.key == pygame.K_c:
             player1.attack()
         elif event.key == pygame.K_s:
             player1.block()
-        elif event.key == pygame.K_e:
+        elif event.key == pygame.K_v:
             player1.dash()
-        elif event.key == pygame.K_q:
+        elif event.key == pygame.K_b:
             if player1 == characters[2]:
                 player1.shoot(player2)
             else:
@@ -398,20 +398,20 @@ def handle_battle_input(event):
                 player2.move(20)
             elif event.key == pygame.K_UP:
                 player2.jump()
-            elif event.key == pygame.K_SPACE:
+            elif event.key == pygame.K_SEMICOLON:
                 player2.attack()
             elif event.key == pygame.K_DOWN:
                 player2.block()
-            elif event.key == pygame.K_RSHIFT:
-                player2.dash()
             elif event.key == pygame.K_l:
+                player2.dash()
+            elif event.key == pygame.K_k:
                 if player2 == characters2[2]:
                     player2.shoot(player1)
                 else:
                     player2.shoot()
                 
         if event.type == pygame.KEYUP:
-            if event.key == pygame.K_SPACE:  # 松开攻击键
+            if event.key == pygame.K_SEMICOLON:  # 松开攻击键
                 player2.attack_key_held = False
                 player2.velocity.x = 0
             if event.key in [pygame.K_LEFT, pygame.K_RIGHT]:
