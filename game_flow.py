@@ -18,7 +18,9 @@ pygame.display.set_caption("格鬥遊戲")
 
 # 設定遊戲時鐘
 clock = pygame.time.Clock()
+game_time = clock.get_time()
 FPS = 60
+
 
 # 定義顏色
 WHITE = (255, 255, 255)
@@ -33,7 +35,7 @@ STATE_BATTLE = "battle"
 STATE_RESULT = "result"
 
 # 定義字體
-font_path = "resources/Fight Font/ARCADECLASSIC.TTF"
+font_path = "Font/PressStart2P-Regular.ttf"
 
 # 初始遊戲狀態
 def init_game():
@@ -97,8 +99,9 @@ def load_image():
     cd_img = pygame.transform.scale(cd_img, (70, 70))
 
 
-def draw_text_centered(text, font, color, surface, x, y):
+def draw_text_centered(text, font_path, font_size, color, surface, x, y):
     # 渲染文字
+    font = pygame.font.Font(font_path, font_size)
     rendered_text = font.render(text, True, color)
     # 獲取文字的矩形邊界
     text_rect = rendered_text.get_rect(center=(x, y))
@@ -111,8 +114,11 @@ def draw_menu():
     screen.blit(menu, (0, 0))
     blur_surface.fill((255, 255, 255, 100))
     screen.blit(blur_surface, (0, 0))
-    font = pygame.font.Font(font_path, 74)
-    draw_text_centered("Press Any Key to Start", font, BLACK, screen, SCREEN_WIDTH//2, SCREEN_HEIGHT//2)
+    
+    draw_text_centered("WILD PUNCH", font_path, 74, (235, 142, 85), screen, SCREEN_WIDTH//2, SCREEN_HEIGHT//2 - 50)
+    
+    if current_time % 1000 < 500:
+        draw_text_centered("Press Any Key to Start", font_path, 24, WHITE, screen, SCREEN_WIDTH//2, SCREEN_HEIGHT//2 + 50)
 
 
 #選擇玩家人數
@@ -120,17 +126,16 @@ def draw_menu():
 def draw_player_select():
     screen.blit(menu, (0, 0))
     screen.blit(blur_surface, (0, 0))
-    font = pygame.font.Font(font_path, 74)
-    draw_text_centered("Select Number of Players", font, BLACK, screen, SCREEN_WIDTH//2, 150)
+    draw_text_centered("Select Number of Players", font_path, 40, (235, 142, 85), screen, SCREEN_WIDTH//2, 150)
 
     # 繪製玩家人數選項
     options = ["1 Player", "2 Players"]
     for i, option in enumerate(options):
-        color = BLACK
-        if i + 1 == num_players:
+        color = WHITE
+        if i + 1 == num_players and current_time % 1000 < 500:
             color = (0, 255, 0)  # 高亮顏色（綠色）
 
-        draw_text_centered(option, font, color, screen, SCREEN_WIDTH//2, 250 + i * 100)
+        draw_text_centered(option, font_path, 30, color, screen, SCREEN_WIDTH//2, 250 + i * 100)
 
 def handle_player_select_input(event):
     global game_state, num_players
@@ -150,24 +155,25 @@ player2_selection = 0
 num_players = 1  # 默認只有一位玩家
 
 def draw_character_select():
-    font = pygame.font.Font(font_path, 74)
     screen.blit(menu, (0, 0))
     screen.blit(blur_surface, (0, 0))
     
-    draw_text_centered("Select Characters", font, BLACK, screen, SCREEN_WIDTH//2, 100)
+    draw_text_centered("Select Characters", font_path, 40, (235, 142, 85), screen, SCREEN_WIDTH//2, 100)
+    if current_time % 1000 < 500:
+        draw_text_centered("Press Enter To Confirm", font_path, 24, (255, 227, 132), screen, SCREEN_WIDTH//2, 530)
     
-    draw_text_centered("Player 1", font, BLACK, screen, SCREEN_WIDTH//4, 200)
+    draw_text_centered("Player 1", font_path, 30, WHITE, screen, SCREEN_WIDTH//4, 200)
     global player1, player2
     if num_players == 2:  # 雙人模式
-        draw_text_centered("Player 2", font, BLACK, screen, SCREEN_WIDTH//4 * 3, 200)
+        draw_text_centered("Player 2", font_path, 30, WHITE, screen, SCREEN_WIDTH//4 * 3, 200)
     else:
-        draw_text_centered("Computer", font, BLACK, screen, SCREEN_WIDTH//4 * 3, 200)
+        draw_text_centered("Computer", font_path, 30 , WHITE, screen, SCREEN_WIDTH//4 * 3, 200)
     player1.position.x = SCREEN_WIDTH//4 - player1.scaled_w//2
-    player1.position.y = 500 - player1.scaled_h
+    player1.position.y = 460 - player1.scaled_h
     player1.draw(character_surface)
     player1.update(1/60)
     player2.position.x = SCREEN_WIDTH//4 * 3 - player2.scaled_w//2
-    player2.position.y = 500 - player2.scaled_h
+    player2.position.y = 460 - player2.scaled_h
     player2.draw(character_surface)
     player2.update(1/60)
 
@@ -201,8 +207,7 @@ def draw_field_select():
     field = bg[field_num].blit_ready()
     screen.blit(field, (0, 0))
     screen.blit(blur_surface, (0, 0))
-    font = pygame.font.Font(font_path, 74)
-    draw_text_centered("field" + str(field_num + 1), font, BLACK, screen, SCREEN_WIDTH//2, SCREEN_HEIGHT//2)
+    draw_text_centered("field" + str(field_num + 1), font_path, 50, WHITE, screen, SCREEN_WIDTH//2, SCREEN_HEIGHT//2)
 
 def handle_field_input(event):
     global game_state, field_num, start_time
@@ -333,20 +338,16 @@ def draw_battle():
 
     if player1.config.cooldowns["DASH"] > 0:
         pygame.draw.circle(character_surface, (255, 255, 255, 200), (75, 555), 25, 25)
-        font = pygame.font.Font(font_path, 24)
-        draw_text_centered(str(int(player1.config.cooldowns["DASH"])+1), font, BLACK, character_surface, 75, 555)
+        draw_text_centered(str(int(player1.config.cooldowns["DASH"])+1), font_path, 24, BLACK, character_surface, 75, 555)
     if player1.config.cooldowns["SHOOT"] > 0:
         pygame.draw.circle(character_surface, (255, 255, 255, 200), (148, 555), 25, 25)
-        font = pygame.font.Font(font_path, 24)
-        draw_text_centered(str(int(player1.config.cooldowns["SHOOT"])+1), font, BLACK, character_surface, 148, 555)
+        draw_text_centered(str(int(player1.config.cooldowns["SHOOT"])+1), font_path, 24, BLACK, character_surface, 148, 555)
     if player2.config.cooldowns["DASH"] > 0:
         pygame.draw.circle(character_surface, (255, 255, 255, 200), (1105, 555), 25, 25)
-        font = pygame.font.Font(font_path, 24)
-        draw_text_centered(str(int(player2.config.cooldowns["DASH"])+1), font, BLACK, character_surface, 1105, 555)
+        draw_text_centered(str(int(player2.config.cooldowns["DASH"])+1), font_path, 24, BLACK, character_surface, 1105, 555)
     if player2.config.cooldowns["SHOOT"] > 0:
         pygame.draw.circle(character_surface, (255, 255, 255, 200), (1038, 555), 25, 25)
-        font = pygame.font.Font(font_path, 24)
-        draw_text_centered(str(int(player2.config.cooldowns["SHOOT"])+1), font, BLACK, character_surface, 1038, 555)
+        draw_text_centered(str(int(player2.config.cooldowns["SHOOT"])+1), font_path, 24, BLACK, character_surface, 1038, 555)
 
     screen.blit(field, (0, 0))
     screen.blit(item_surface, (0, 0))
@@ -427,8 +428,6 @@ def draw_result():
     screen.blit(blur_surface, (0, 0))
     screen.blit(item_surface, (0, 0))
     screen.blit(character_surface, (0, 0))
-    font = pygame.font.Font(font_path, 74)
-    # draw_text_centered("Game Over", font, BLACK, screen, SCREEN_WIDTH//2, SCREEN_HEIGHT//2 - 100)
     if goal1 > goal2:
         winner = pygame.image.load('./resources/Fight Font/ft_033.png')
     elif goal1 < goal2:
@@ -439,7 +438,8 @@ def draw_result():
         winner = pygame.image.load('./resources/Fight Font/ft_034.png')
     winner = pygame.transform.scale2x(winner)
     screen.blit(winner, (SCREEN_WIDTH//2 - winner.get_width()//2, SCREEN_HEIGHT//2 - winner.get_height()//2))
-    draw_text_centered("Press R to Restart", font, BLACK, screen, SCREEN_WIDTH//2, SCREEN_HEIGHT//2 + 100)
+    if current_time % 1000 < 500:
+        draw_text_centered("Press R to Restart", font_path, 30, (235, 142, 85), screen, SCREEN_WIDTH//2, SCREEN_HEIGHT//2 + 100)
 
 def handle_result_input(event):
     global game_state
@@ -455,6 +455,8 @@ if __name__ == "__main__":
     load_image()
     # 更新遊戲循環中的輸入處理
     while True:
+        global current_time
+        current_time = pygame.time.get_ticks()
         keys = pygame.key.get_pressed()
         # 處理事件
         for event in pygame.event.get():
