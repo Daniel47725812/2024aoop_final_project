@@ -6,8 +6,8 @@ jerry:
 
 
 daniel:
-1. installation（如何使用）
-2. 遊戲規則（flow、遊戲制度、模式）
+x1. installation（如何使用）
+x2. 遊戲規則（flow、遊戲制度、模式）
 
 架構：
 installation（如何使用）
