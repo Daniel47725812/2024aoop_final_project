@@ -1,15 +1,21 @@
 # 2024aoop_final_project
 
 ## Installation
+
 1.安裝所需函式庫
+
 ```cmd
 pip3 install -r requirements.txt -v
 ```
+
 2.執行game_flow.py
+
 ```cmd
 python3 game_flow.py
 ```
+
 ## Game Rules
+
 **遊戲介紹：**
 
 這是一款快節奏的2D格鬥遊戲，玩家可以選擇角色展開刺激對戰。遊戲提供單人模式（與AI對戰）和雙人模式（與朋友對戰），滿足不同玩家的挑戰需求。  
@@ -40,10 +46,74 @@ python3 game_flow.py
    當一方率先贏得兩回合，遊戲結束，顯示比賽結果。  
 
 ## Characters
+
+### Kirby
+
+![Kirby](images/Kirpy.png)
+
+| **Features** | Runs faster, jumps higher, and has greater agility.                                              |
+|--------------|--------------------------------------------------------------------------------------------------|
+| **Skill**    | Launches a fast-moving fireball that deals significant damage to enemies it hits. (Cooldown: 3s) |
+
+### Ryu
+
+![Ryu](images/Ryu.png)
+
+| **Features** | Capable of dealing massive damage but has low health, making it easy to be defeated.                                                                      |
+|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Skill**    | Fires an energy projectile that deals massive damage.  Pressing the skill button again will teleport the user to the projectile's location.(Cooldown: 5s) |
+
+### Retsu
+
+![Retsu](images/Retsu.png)
+
+| **Features** | Possesses excellent attack damage and health but can only perform melee attacks.                                   |
+|--------------|--------------------------------------------------------------------------------------------------------------------|
+| **Skill**    | Dashes quickly in the current direction, stopping upon hitting an enemy and dealing damage to them. (Cooldown: 6s) |
+
 ## Game Controls
+
+### Single Player
+
+| **A** | walk left  |
+|-------|------------|
+| **D** | walk right |
+| **W** | jump       |
+| **S** | defend     |
+| **C** | attack     |
+| **V** | dash       |
+| **B** | skill      |
+
+### Double Player
+
+**Player1**
+
+| **A** | walk left  |
+|-------|------------|
+| **D** | walk right |
+| **W** | jump       |
+| **S** | defend     |
+| **C** | attack     |
+| **V** | dash       |
+| **B** | skill      |
+
+**Player2**
+
+| **LEFP**  | walk left  |
+|-----------|------------|
+| **RIGHT** | walk right |
+| **UP**    | jump       |
+| **DOWN**  | defend     |
+| **:**     | attack     |
+| **L**     | dash       |
+| **K**     | skill      |
+
 ## Code Architecture
+
 ### Flowchart
+
 ![Flowchart](images/flow_diagram.png)
 
 ### Class Diagram
+
 ![Class Diagram](images/class_diagram.png)
